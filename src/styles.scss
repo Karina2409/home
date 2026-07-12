@@ -1,0 +1,12 @@
+@use "tailwindcss";
+@use "primeicons/primeicons.css";
+
+@theme {
+    --color-primary: #c26d55;
+    --color-primary-dark: #a85a44;
+    --color-primary-light: #d4856f;
+
+    --color-secondary: #8FA18B;
+    --color-secondary-dark: #778874;
+    --color-secondary-light: #a6b8a2;
+}

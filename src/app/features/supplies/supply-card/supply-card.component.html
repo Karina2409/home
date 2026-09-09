@@ -1,0 +1,69 @@
+<div class="bg-surface rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-shadow animate-fade-in relative">
+    <!-- Status Badge -->
+    <div class="absolute top-4 right-4">
+        @if (supply().status === 'low') {
+            <span
+                class="inline-flex items-center px-2.5 py-1 rounded-lg bg-danger/10 text-danger text-xs font-semibold uppercase tracking-wide">
+              Мало
+            </span>
+        } @else if (supply().status === 'enough') {
+            <span
+                class="inline-flex items-center px-2.5 py-1 rounded-lg bg-success/10 text-success text-xs font-semibold uppercase tracking-wide">
+              Достаточно
+            </span>
+        } @else {
+            <span
+                class="inline-flex items-center px-2.5 py-1 rounded-lg bg-hover text-muted text-xs font-semibold uppercase tracking-wide">
+                Нет
+            </span>
+        }
+    </div>
+
+    <!-- Icon & Name -->
+    <div class="flex items-start gap-3 mb-3 pr-20">
+        <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
+            [style.background-color]="supply().iconBg"
+            [style.color]="'#666'"
+        >
+            <i [class]="supply().icon"></i>
+        </div>
+        <div>
+            <h3 class="font-semibold text-text text-base leading-tight">{{ supply().name }}</h3>
+            <p class="text-xs text-muted mt-0.5">{{ supply().location }}</p>
+        </div>
+    </div>
+
+    <!-- Quantity Control -->
+    <div class="flex items-center justify-between mt-4">
+        <div>
+            <p class="text-xs text-muted uppercase tracking-wider font-medium mb-1">Количество</p>
+            <p class="text-2xl font-bold text-text">{{ supply().quantity }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button
+                (click)="onDecrement()"
+                class="w-9 h-9 rounded-full bg-hover hover:bg-border flex items-center justify-center text-text-secondary transition-colors"
+            >
+                <i class="pi pi-minus text-xs"></i>
+            </button>
+            <button
+                (click)="onIncrement()"
+                class="w-9 h-9 rounded-full bg-primary hover:bg-primary-dark flex items-center justify-center text-white transition-colors"
+            >
+                <i class="pi pi-plus text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Delete -->
+    <div class="mt-4 pt-3 border-t border-border-light flex justify-end">
+        <button
+            (click)="onDelete()"
+            class="flex items-center gap-1.5 text-xs text-muted hover:text-danger transition-colors"
+        >
+            <i class="pi pi-trash"></i>
+            <span>Удалить</span>
+        </button>
+    </div>
+</div>

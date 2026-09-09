@@ -1,0 +1,101 @@
+<p-dialog
+    [visible]="visible()"
+    (visibleChange)="onVisibleChange($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '28rem' }"
+    [header]="isEdit() ? 'Редактировать товар' : 'Добавить товар'"
+>
+    <form [formGroup]="form" class="flex flex-col gap-4">
+        <!-- Name -->
+        <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-text-secondary">Название</label>
+            <input
+                pInputText
+                formControlName="name"
+                placeholder="Например: Шампунь"
+                class="w-full"
+            />
+        </div>
+
+        <!-- Category -->
+        <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-text-secondary">Категория / Место</label>
+            <p-select
+                [options]="categories"
+                formControlName="category"
+                placeholder="Выберите категорию"
+                [style]="{ width: '100%' }"
+                appendTo="body"
+            />
+        </div>
+
+        <!-- Location -->
+        <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-text-secondary">Расположение</label>
+            <input
+                pInputText
+                formControlName="location"
+                placeholder="Например: Ванная комната"
+                class="w-full"
+            />
+        </div>
+
+        <!-- Quantity & Min Quantity -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-medium text-text-secondary">Количество</label>
+                <p-inputNumber
+                    formControlName="quantity"
+                    [min]="0"
+                    [showButtons]="false"
+                    placeholder="0"
+                    [style]="{ width: '100%' }"
+                />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-medium text-text-secondary">Мин. запас</label>
+                <p-inputNumber
+                    formControlName="minQuantity"
+                    [min]="0"
+                    [showButtons]="false"
+                    placeholder="0"
+                    [style]="{ width: '100%' }"
+                />
+            </div>
+        </div>
+
+        <!-- Unit -->
+        <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-text-secondary">Единица измерения</label>
+            <p-select
+                [options]="units"
+                formControlName="unit"
+                placeholder="Выберите единицу"
+                [style]="{ width: '100%' }"
+                appendTo="body"
+            />
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-3">
+            <button
+                pButton
+                type="button"
+                label="Отмена"
+                class="p-button-text p-button-secondary"
+                (click)="onCancel()"
+            ></button>
+            <button
+                pButton
+                type="button"
+                [label]="isEdit() ? 'Сохранить' : 'Добавить'"
+                class="p-button-primary"
+                [disabled]="form.invalid"
+                (click)="onSubmit()"
+            ></button>
+        </div>
+    </ng-template>
+</p-dialog>

@@ -1,0 +1,98 @@
+<!-- Компонент для отображения toast-уведомлений PrimeNG -->
+<p-toast/>
+
+<div class="p-4 md:p-8 max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-text">Запасы</h1>
+            <p class="text-muted mt-1">Хозяйственные товары и средства для дома</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-muted hidden md:inline">Всего предметов: {{ totalCount() }}</span>
+            <button
+                pButton
+                icon="pi pi-plus"
+                label="Добавить предмет"
+                class="p-button-primary"
+                (click)="openAddDialog()"
+            ></button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <app-supply-stats
+        [totalCount]="totalCount()"
+        [lowCount]="lowCount()"
+        [outCount]="outCount()"
+    />
+
+    <!-- Search -->
+    <div class="mb-6">
+        <span class="p-input-icon-left w-full md:w-80">
+            <i class="pi pi-search"></i>
+            <input
+                pInputText
+                type="text"
+                [(ngModel)]="searchQuery"
+                placeholder="Поиск товаров..."
+                class="w-full"
+            />
+        </span>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+        <div class="flex justify-center py-16">
+            <p-progressSpinner strokeWidth="4"/>
+        </div>
+    } @else {
+        <!-- Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- Add Card -->
+            <button
+                (click)="openAddDialog()"
+                class="bg-surface rounded-2xl p-5 border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-3 min-h-[200px] group"
+            >
+                <div
+                    class="w-12 h-12 rounded-full bg-hover group-hover:bg-primary/10 flex items-center justify-center text-muted group-hover:text-primary transition-colors">
+                    <i class="pi pi-plus text-xl"></i>
+                </div>
+                <div class="text-center">
+                    <p class="font-medium text-text-secondary group-hover:text-primary transition-colors">Добавить
+                        товар</p>
+                    <p class="text-xs text-muted mt-0.5">Пополнить запасы дома</p>
+                </div>
+            </button>
+
+            <!-- Supply Cards -->
+            @for (supply of filteredSupplies(); track supply.id) {
+                <app-supply-card
+                    [supply]="supply"
+                    (increment)="onIncrement($event)"
+                    (decrement)="onDecrement($event)"
+                    (delete)="onDelete($event)"
+                />
+            }
+        </div>
+
+        <!-- Empty State -->
+        @if (filteredSupplies().length === 0) {
+            <div class="text-center py-16">
+                <div class="w-16 h-16 rounded-full bg-hover flex items-center justify-center mx-auto mb-4">
+                    <i class="pi pi-search text-2xl text-muted"></i>
+                </div>
+                <p class="text-text-secondary font-medium">Ничего не найдено</p>
+                <p class="text-muted text-sm mt-1">Попробуйте изменить запрос поиска</p>
+            </div>
+        }
+    }
+</div>
+
+<!-- Form Dialog -->
+<app-supply-form
+    [visible]="dialogVisible()"
+    [supply]="selectedSupply()"
+    (visibleChange)="dialogVisible.set($event)"
+    (submit)="onFormSubmit($event)"
+/>

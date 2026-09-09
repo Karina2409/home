@@ -5,7 +5,6 @@ import {InputTextModule} from 'primeng/inputtext';
 import {ButtonModule} from 'primeng/button';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import {ToastModule} from 'primeng/toast';
-
 import {SupplyStatsComponent} from '@supplies/supply-stats/supply-stats.component';
 import {SupplyFormComponent} from '@supplies/supply-form/supply-form.component';
 import {Supply, SupplyFormData} from '@models/supply.model';

@@ -1,0 +1,9 @@
+/* Сброс голубого фона при автозаполнении Chrome/Safari */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #fdfaf9 inset !important;
+    -webkit-text-fill-color: #3d2b27 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

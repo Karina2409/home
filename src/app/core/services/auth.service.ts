@@ -1,9 +1,9 @@
-import {inject, Injectable, signal} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {SupabaseService} from '@core/services/supabase.service';
 import {User, Session} from '@supabase/supabase-js';
 import {MessageService} from 'primeng/api';
-import {from, Observable, of} from 'rxjs';
+import {finalize, from, Observable, of, switchMap} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
 
 export interface AuthCredentials {
@@ -23,6 +23,8 @@ export class AuthService {
     readonly session = signal<Session | null>(null);
     readonly loading = signal<boolean>(false);
 
+    readonly isAuthenticated = computed(() => !!this.session());
+
     constructor() {
         // Инициализируем сессию при старте приложения
         this.supabase.auth.getSession().then(({data}) => {
@@ -35,11 +37,6 @@ export class AuthService {
             this.session.set(session);
             this.currentUser.set(session?.user ?? null);
         });
-    }
-
-    // Проверка авторизации для шаблонов
-    get isAuthenticated(): boolean {
-        return !!this.session();
     }
 
     // Вход по Email и Паролю
@@ -58,60 +55,28 @@ export class AuthService {
                 this.currentUser.set(data.user);
                 return true;
             }),
+            switchMap(() => from(this.router.navigate(['/supplies']))),
             tap(() => {
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Успешно',
                     detail: 'Вы вошли в систему'
                 });
-                this.router.navigate(['/supplies']);
             }),
+            map(() => true),
             catchError((err) => {
                 this.showError('Ошибка входа', err.message);
                 return of(false);
             }),
-            tap(() => this.loading.set(false))
-        );
-    }
-
-    // Регистрация нового пользователя
-    // Благодаря вашему триггеру on_auth_user_created в Supabase автоматически создастся запись в public.profiles
-    register(credentials: AuthCredentials): Observable<boolean> {
-        this.loading.set(true);
-
-        return from(
-            this.supabase.auth.signUp({
-                email: credentials.email,
-                password: credentials.password,
-                options: {
-                    data: {
-                        full_name: credentials.fullName || credentials.email.split('@')[0]
-                    }
-                }
-            })
-        ).pipe(
-            map(({error}) => {
-                if (error) throw error;
-                return true;
-            }),
-            tap(() => {
-                this.messageService.add({
-                    severity: 'info',
-                    summary: 'Регистрация успешна',
-                    detail: 'Если включено подтверждение — проверьте почту, иначе можете войти.'
-                });
-            }),
-            catchError((err) => {
-                this.showError('Ошибка регистрации', err.message);
-                return of(false);
-            }),
-            tap(() => this.loading.set(false))
+            finalize(() => this.loading.set(false))
         );
     }
 
     // Выход из системы
-    logout(): Observable<boolean> {
-        return from(this.supabase.auth.signOut()).pipe(
+    logout() {
+        this.loading.set(true);
+
+        from(this.supabase.auth.signOut()).pipe(
             map(({error}) => {
                 if (error) throw error;
                 return true;
@@ -119,13 +84,14 @@ export class AuthService {
             tap(() => {
                 this.session.set(null);
                 this.currentUser.set(null);
-                this.router.navigate(['/login']);
             }),
+            switchMap(() => from(this.router.navigate(['/login']))),
             catchError((err) => {
                 this.showError('Ошибка выхода', err.message);
                 return of(false);
-            })
-        );
+            }),
+            finalize(() => this.loading.set(false))
+        ).subscribe();
     }
 
     private showError(title: string, detail: string): void {

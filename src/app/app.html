@@ -1,12 +1,22 @@
-<div class="min-h-screen bg-background">
-    <!-- Desktop Sidebar -->
-    <app-sidebar class="hidden md:block"/>
+@if (authService.loading()) {
+    <div class="h-screen w-screen flex items-center justify-center bg-background">
+        <p-progressSpinner strokeWidth="4" />
+    </div>
+} @else {
+    <div class="min-h-screen bg-background">
+        <!-- Desktop Sidebar -->
+        @if (authService.isAuthenticated()) {
+            <app-sidebar class="hidden md:block"/>
+        }
 
-    <!-- Main Content -->
-    <main class="md:ml-64 pb-20 md:pb-0">
-        <router-outlet/>
-    </main>
+        <!-- Main Content -->
+        <main [class.md:ml-64]="authService.isAuthenticated()" [class.pb-20]="authService.isAuthenticated()" class="md:pb-0">
+            <router-outlet/>
+        </main>
 
-    <!-- Mobile Bottom Nav -->
-    <app-bottom-nav/>
-</div>
+        <!-- Mobile Bottom Nav -->
+        @if (authService.isAuthenticated()) {
+            <app-bottom-nav/>
+        }
+    </div>
+}

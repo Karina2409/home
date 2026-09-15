@@ -1,0 +1,104 @@
+<div class="min-h-screen flex items-center justify-center bg-[#fcf8f6] p-6 font-sans">
+    <div class="w-full max-w-[440px] flex flex-col items-center">
+
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="w-[60px] h-[60px] bg-[#c46d53] rounded-[16px] flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <i class="pi pi-home text-[28px] text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-[#3d2b27] mb-2 font-serif">Family Hearth</h1>
+            <p class="text-[#8c7a75] text-sm m-0">Уютный дом и забота для всей семьи</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white rounded-[24px] p-8 w-full shadow-[0_10px_25px_rgba(0,0,0,0.03)]">
+            <h2 class="text-2xl font-bold text-[#3d2b27] mb-1 font-serif">Добро пожаловать</h2>
+            <p class="text-[#8c7a75] text-sm mb-6">Войдите в учетную запись вашей семьи</p>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" autocomplete="off">
+
+                <!-- Field: Email -->
+                <div class="flex flex-col gap-2">
+                    <label for="email" class="font-semibold text-xs text-[#3d2b27]">Логин</label>
+                    <p-iconfield class="w-full">
+                        <p-inputicon>
+                            <i class="pi pi-envelope text-[#8c7a75]"></i>
+                        </p-inputicon>
+                        <input
+                            id="email"
+                            type="email"
+                            pInputText
+                            formControlName="email"
+                            placeholder="Логин или email"
+                            class="w-full"
+                        />
+                    </p-iconfield>
+                    @if (loginForm.controls.email.invalid && loginForm.controls.email.touched) {
+                        <small class="text-red-500 text-xs">Введите корректный email</small>
+                    }
+                </div>
+
+                <!-- Field: Password -->
+                <div class="flex flex-col gap-2">
+                    <p-password
+                        [inputId]="'password'"
+                        formControlName="password"
+                        placeholder="••••••••••••"
+                        [toggleMask]="true"
+                        [feedback]="false"
+                        class="w-full"
+                        inputStyleClass="w-full"
+                    />
+
+                    @if (loginForm.controls.password.invalid && loginForm.controls.password.touched) {
+                        <small class="text-red-500 text-xs">Пароль обязателен (минимум 6 символов)</small>
+                    }
+                </div>
+
+                <!-- Field: Remember Me -->
+                <div class="flex items-center gap-2 my-1">
+                    <p-checkbox
+                        formControlName="rememberMe"
+                        [binary]="true"
+                        inputId="rememberMe"
+                    />
+                    <label for="rememberMe" class="text-xs text-[#5c4b47] cursor-pointer">
+                        Запомнить на этом устройстве
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <p-button
+                    type="submit"
+                    label="Войти"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    [loading]="authService.loading()"
+                    [disabled]="loginForm.invalid"
+                    styleClass="w-full py-3 font-semibold"
+                />
+            </form>
+
+            <!-- Divider -->
+            <div class="relative flex py-5 items-center">
+                <div class="flex-grow border-t border-[#f0e6e3]"></div>
+                <span class="flex-shrink mx-3 text-[#b5a8a4] text-xs">или</span>
+                <div class="flex-grow border-t border-[#f0e6e3]"></div>
+            </div>
+
+            <!-- GitHub Button -->
+            <p-button
+                label="Войти через GitHub"
+                icon="pi pi-github"
+                variant="outlined"
+                styleClass="w-full py-3"
+                (onClick)="loginWithGithub()"
+            />
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-xs text-[#a89a95] text-center">
+            Family Hearth © 2024 • Для уютных и дружных домов
+        </footer>
+    </div>
+</div>

@@ -1,5 +1,6 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {RouterLink, RouterLinkActive} from '@angular/router';
+import {AuthService} from '@services/auth.service';
 
 interface NavItem {
     label: string;
@@ -22,4 +23,6 @@ const NAV_ITEMS: NavItem[] = [
 })
 export class SidebarComponent {
     protected readonly navItems = NAV_ITEMS;
+
+    readonly authService = inject(AuthService);
 }

@@ -1,11 +1,11 @@
-import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
-import {Supply} from '@models/supply.model';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { Supply } from '@models/supply.model';
 
 @Component({
     selector: 'app-supply-card',
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './supply-card.component.html',
-    styleUrl: './supply-card.component.scss'
+    styleUrl: './supply-card.component.scss',
 })
 export class SupplyCardComponent {
     supply = input.required<Supply>();

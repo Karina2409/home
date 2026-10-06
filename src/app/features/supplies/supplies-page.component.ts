@@ -1,15 +1,22 @@
-import {ChangeDetectionStrategy, Component, computed, inject, signal, DestroyRef} from '@angular/core';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {FormsModule} from '@angular/forms';
-import {InputTextModule} from 'primeng/inputtext';
-import {ButtonModule} from 'primeng/button';
-import {ProgressSpinnerModule} from 'primeng/progressspinner';
-import {ToastModule} from 'primeng/toast';
-import {SupplyStatsComponent} from '@supplies/supply-stats/supply-stats.component';
-import {SupplyFormComponent} from '@supplies/supply-form/supply-form.component';
-import {Supply, SupplyFormData} from '@models/supply.model';
-import {SupplyCardComponent} from '@supplies/supply-card/supply-card.component';
-import {SupplyService} from '@services/supplies.service';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    DestroyRef,
+    inject,
+    signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { Supply, SupplyFormData } from '@models/supply.model';
+import { SupplyService } from '@services/supplies.service';
+import { SupplyCardComponent } from '@supplies/supply-card/supply-card.component';
+import { SupplyFormComponent } from '@supplies/supply-form/supply-form.component';
+import { SupplyStatsComponent } from '@supplies/supply-stats/supply-stats.component';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
     selector: 'app-supplies-page',
@@ -26,6 +33,7 @@ import {SupplyService} from '@services/supplies.service';
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './supplies-page.component.html',
+    styleUrl: './supplies-page.component.scss',
 })
 export class SuppliesPageComponent {
     private readonly supplyService = inject(SupplyService);
@@ -38,22 +46,24 @@ export class SuppliesPageComponent {
     protected readonly loading = this.supplyService.loading;
 
     protected readonly totalCount = computed(() => this.supplyService.supplies().length);
-    protected readonly lowCount = computed(() =>
-        this.supplyService.supplies().filter((s) => s.status === 'low').length
+    protected readonly lowCount = computed(
+        () => this.supplyService.supplies().filter((s) => s.status === 'low').length,
     );
-    protected readonly outCount = computed(() =>
-        this.supplyService.supplies().filter((s) => s.status === 'out').length
+    protected readonly outCount = computed(
+        () => this.supplyService.supplies().filter((s) => s.status === 'out').length,
     );
 
     protected readonly filteredSupplies = computed(() => {
         const query = this.searchQuery().toLowerCase().trim();
         if (!query) return this.supplyService.supplies();
-        return this.supplyService.supplies().filter(
-            (s) =>
-                s.name.toLowerCase().includes(query) ||
-                s.category.toLowerCase().includes(query) ||
-                s.location.toLowerCase().includes(query)
-        );
+        return this.supplyService
+            .supplies()
+            .filter(
+                (s) =>
+                    s.name.toLowerCase().includes(query) ||
+                    s.category.toLowerCase().includes(query) ||
+                    s.location.toLowerCase().includes(query),
+            );
     });
 
     openAddDialog(): void {
@@ -76,10 +86,7 @@ export class SuppliesPageComponent {
     }
 
     onDelete(id: string): void {
-        this.supplyService
-            .deleteSupply(id)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe();
+        this.supplyService.deleteSupply(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
 
     onFormSubmit(data: SupplyFormData): void {

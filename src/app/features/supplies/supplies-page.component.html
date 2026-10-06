@@ -1,30 +1,27 @@
-<p-toast/>
+<p-toast />
 
-<div class="p-4 md:p-8 max-w-6xl mx-auto">
+<div class="mx-auto max-w-6xl p-4 md:p-8">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-            <h1 class="text-3xl font-bold text-text">Запасы</h1>
+            <h1 class="text-text text-3xl font-bold">Запасы</h1>
             <p class="text-muted mt-1">Хозяйственные товары и средства для дома</p>
         </div>
         <div class="flex items-center gap-3">
-            <span class="text-sm text-muted hidden md:inline">Всего предметов: {{ totalCount() }}</span>
+            <span class="text-muted hidden text-sm md:inline"
+                >Всего предметов: {{ totalCount() }}</span
+            >
             <button
                 pButton
                 icon="pi pi-plus"
                 label="Добавить предмет"
                 class="p-button-primary"
-                (click)="openAddDialog()"
-            ></button>
+                (click)="openAddDialog()"></button>
         </div>
     </div>
 
     <!-- Stats -->
-    <app-supply-stats
-        [totalCount]="totalCount()"
-        [lowCount]="lowCount()"
-        [outCount]="outCount()"
-    />
+    <app-supply-stats [totalCount]="totalCount()" [lowCount]="lowCount()" [outCount]="outCount()" />
 
     <!-- Search -->
     <div class="mb-6">
@@ -35,32 +32,32 @@
                 type="text"
                 [(ngModel)]="searchQuery"
                 placeholder="Поиск товаров..."
-                class="w-full"
-            />
+                class="w-full" />
         </span>
     </div>
 
     <!-- Loading -->
     @if (loading()) {
-<!--        <div class="flex justify-center py-16">-->
-<!--            <p-progressSpinner strokeWidth="4"/>-->
-<!--        </div>-->
+        <!--        <div class="flex justify-center py-16">-->
+        <!--            <p-progressSpinner strokeWidth="4"/>-->
+        <!--        </div>-->
     } @else {
         <!-- Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <!-- Add Card -->
             <button
                 (click)="openAddDialog()"
-                class="bg-surface rounded-2xl p-5 border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-3 min-h-[200px] group"
-            >
+                class="bg-surface border-border hover:border-primary/40 hover:bg-primary/5 group flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-5 transition-all">
                 <div
-                    class="w-12 h-12 rounded-full bg-hover group-hover:bg-primary/10 flex items-center justify-center text-muted group-hover:text-primary transition-colors">
+                    class="bg-hover group-hover:bg-primary/10 text-muted group-hover:text-primary flex h-12 w-12 items-center justify-center rounded-full transition-colors">
                     <i class="pi pi-plus text-xl"></i>
                 </div>
                 <div class="text-center">
-                    <p class="font-medium text-text-secondary group-hover:text-primary transition-colors">Добавить
-                        товар</p>
-                    <p class="text-xs text-muted mt-0.5">Пополнить запасы дома</p>
+                    <p
+                        class="text-text-secondary group-hover:text-primary font-medium transition-colors">
+                        Добавить товар
+                    </p>
+                    <p class="text-muted mt-0.5 text-xs">Пополнить запасы дома</p>
                 </div>
             </button>
 
@@ -70,19 +67,19 @@
                     [supply]="supply"
                     (increment)="onIncrement($event)"
                     (decrement)="onDecrement($event)"
-                    (delete)="onDelete($event)"
-                />
+                    (delete)="onDelete($event)" />
             }
         </div>
 
         <!-- Empty State -->
         @if (filteredSupplies().length === 0) {
-            <div class="text-center py-16">
-                <div class="w-16 h-16 rounded-full bg-hover flex items-center justify-center mx-auto mb-4">
-                    <i class="pi pi-search text-2xl text-muted"></i>
+            <div class="py-16 text-center">
+                <div
+                    class="bg-hover mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                    <i class="pi pi-search text-muted text-2xl"></i>
                 </div>
                 <p class="text-text-secondary font-medium">Ничего не найдено</p>
-                <p class="text-muted text-sm mt-1">Попробуйте изменить запрос поиска</p>
+                <p class="text-muted mt-1 text-sm">Попробуйте изменить запрос поиска</p>
             </div>
         }
     }
@@ -93,5 +90,4 @@
     [visible]="dialogVisible()"
     [supply]="selectedSupply()"
     (visibleChange)="dialogVisible.set($event)"
-    (submit)="onFormSubmit($event)"
-/>
+    (submit)="onFormSubmit($event)" />

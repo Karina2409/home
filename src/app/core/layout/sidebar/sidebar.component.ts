@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {RouterLink, RouterLinkActive} from '@angular/router';
-import {AuthService} from '@services/auth.service';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '@services/auth.service';
 
 interface NavItem {
     label: string;
@@ -9,10 +9,10 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-    {label: 'Recipes', icon: 'pi pi-utensils', route: '/dishes'},
-    {label: 'Inventory', icon: 'pi pi-box', route: '/fridge'},
-    {label: 'Household', icon: 'pi pi-shopping-bag', route: '/supplies'},
-    {label: 'To-Do', icon: 'pi pi-list-check', route: '/tasks'},
+    { label: 'Рецепты', icon: 'pi pi-utensils', route: '/dishes' },
+    { label: 'Продукты', icon: 'pi pi-box', route: '/fridge' },
+    { label: 'Запасы', icon: 'pi pi-shopping-bag', route: '/supplies' },
+    { label: 'Задачи', icon: 'pi pi-list-check', route: '/tasks' },
 ];
 
 @Component({

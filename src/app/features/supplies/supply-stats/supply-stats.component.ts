@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, Component, input} from '@angular/core';
-import {StatCard} from '@models/supply.model';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { StatCard } from '@models/supply.model';
 
 @Component({
     selector: 'app-supply-stats',
@@ -7,7 +7,7 @@ import {StatCard} from '@models/supply.model';
     imports: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './supply-stats.component.html',
-    styleUrl: './supply-stats.component.scss'
+    styleUrl: './supply-stats.component.scss',
 })
 export class SupplyStatsComponent {
     totalCount = input.required<number>();

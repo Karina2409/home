@@ -1,11 +1,10 @@
-import {ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode} from '@angular/core';
-import {provideRouter} from '@angular/router';
-
-import {routes} from './app.routes';
-import {provideServiceWorker} from '@angular/service-worker';
-import {providePrimeNG} from 'primeng/config';
-import {MessageService} from 'primeng/api';
-import {FamilyHearthPreset} from './assets/family-hearth-preset';
+import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
+import { FamilyHearthPreset } from '@assets/family-hearth-preset';
+import { MessageService } from 'primeng/api';
+import { providePrimeNG } from 'primeng/config';
+import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -20,9 +19,9 @@ export const appConfig: ApplicationConfig = {
                 preset: FamilyHearthPreset,
                 options: {
                     darkModeSelector: '.app-dark',
-                }
-            }
+                },
+            },
         }),
-        MessageService
+        MessageService,
     ],
 };

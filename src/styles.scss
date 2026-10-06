@@ -1,5 +1,5 @@
-@use "primeicons/primeicons.css";
-@use "tailwindcss";
+@use 'primeicons/primeicons.css';
+@use 'tailwindcss';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @theme {
@@ -7,7 +7,7 @@
     --color-primary-dark: #a85a44;
     --color-primary-light: #d4856f;
 
-    --color-secondary: #8FA18B;
+    --color-secondary: #8fa18b;
     --color-secondary-dark: #778874;
     --color-secondary-light: #a6b8a2;
 }

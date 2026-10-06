@@ -1,27 +1,27 @@
-import {ChangeDetectionStrategy, Component, effect, input, output} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {DialogModule} from 'primeng/dialog';
-import {ButtonModule} from 'primeng/button';
-import {InputTextModule} from 'primeng/inputtext';
-import {InputNumberModule} from 'primeng/inputnumber';
-import {SelectModule} from 'primeng/select';
-import {Supply, SupplyFormData} from '@models/supply.model';
+import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Supply, SupplyFormData } from '@models/supply.model';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 
 const CATEGORIES = [
-    {label: 'Ванная комната', value: 'Ванная комната'},
-    {label: 'Гигиена', value: 'Гигиена'},
-    {label: 'Хозтовары', value: 'Хозтовары'},
-    {label: 'Кухня', value: 'Кухня'},
-    {label: 'Кладовая', value: 'Кладовая'},
-    {label: 'Хозблок', value: 'Хозблок'},
+    { label: 'Ванная комната', value: 'Ванная комната' },
+    { label: 'Гигиена', value: 'Гигиена' },
+    { label: 'Хозтовары', value: 'Хозтовары' },
+    { label: 'Кухня', value: 'Кухня' },
+    { label: 'Кладовая', value: 'Кладовая' },
+    { label: 'Хозблок', value: 'Хозблок' },
 ];
 
 const UNITS = [
-    {label: 'шт', value: 'шт'},
-    {label: 'л', value: 'л'},
-    {label: 'кг', value: 'кг'},
-    {label: 'мл', value: 'мл'},
-    {label: 'упак', value: 'упак'},
+    { label: 'шт', value: 'шт' },
+    { label: 'л', value: 'л' },
+    { label: 'кг', value: 'кг' },
+    { label: 'мл', value: 'мл' },
+    { label: 'упак', value: 'упак' },
 ];
 
 @Component({
@@ -71,7 +71,7 @@ export class SupplyFormComponent {
                     unit: s.unit,
                 });
             } else {
-                this.form.reset({unit: 'шт'});
+                this.form.reset({ unit: 'шт' });
             }
         });
     }
@@ -92,6 +92,6 @@ export class SupplyFormComponent {
         if (this.form.invalid) return;
         this.submit.emit(this.form.value as SupplyFormData);
         this.visibleChange.emit(false);
-        this.form.reset({unit: 'шт'});
+        this.form.reset({ unit: 'шт' });
     }
 }

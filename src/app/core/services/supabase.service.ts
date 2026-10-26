@@ -1,9 +1,9 @@
-import {inject, Injectable} from '@angular/core';
-import {createClient, SupabaseClient} from '@supabase/supabase-js';
-import {environment} from '@core/environments/environment';
-import {MessageService} from 'primeng/api';
+import { inject, Injectable } from '@angular/core';
+import { environment } from '@core/environments/environment';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { MessageService } from 'primeng/api';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class SupabaseService {
     private readonly messageService = inject(MessageService);
 
@@ -27,7 +27,7 @@ export class SupabaseService {
                     return response;
                 },
             },
-        }
+        },
     );
 
     private handleUnauthorized(): void {

@@ -1,4 +1,4 @@
-import {Supply, SupplyFormData, SupplyStatus} from '@models/supply.model';
+import { Supply, SupplyFormData, SupplyStatus } from '@models/supply.model';
 
 export interface SupplyRow {
     id: string;
@@ -32,7 +32,9 @@ export function fromDb(row: SupplyRow): Supply {
     };
 }
 
-export function toDb(data: SupplyFormData): Omit<SupplyRow, 'id' | 'created_at' | 'updated_at' | 'status' | 'icon' | 'icon_bg'> {
+export function toDb(
+    data: SupplyFormData,
+): Omit<SupplyRow, 'id' | 'created_at' | 'updated_at' | 'status' | 'icon' | 'icon_bg'> {
     return {
         name: data.name,
         category: data.category,

@@ -1,10 +1,10 @@
-import {computed, inject, Injectable, signal} from '@angular/core';
-import {Router} from '@angular/router';
-import {SupabaseService} from '@core/services/supabase.service';
-import {User, Session} from '@supabase/supabase-js';
-import {MessageService} from 'primeng/api';
-import {finalize, from, Observable, of, switchMap} from 'rxjs';
-import {catchError, map, tap} from 'rxjs/operators';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { SupabaseService } from '@core/services/supabase.service';
+import { Session, User } from '@supabase/supabase-js';
+import { MessageService } from 'primeng/api';
+import { finalize, from, Observable, of, switchMap } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 export interface AuthCredentials {
     email: string;
@@ -12,7 +12,7 @@ export interface AuthCredentials {
     fullName?: string;
 }
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
     private readonly supabase = inject(SupabaseService).client;
     private readonly router = inject(Router);
@@ -27,7 +27,7 @@ export class AuthService {
 
     constructor() {
         // Инициализируем сессию при старте приложения
-        this.supabase.auth.getSession().then(({data}) => {
+        this.supabase.auth.getSession().then(({ data }) => {
             this.session.set(data.session);
             this.currentUser.set(data.session?.user ?? null);
         });
@@ -46,10 +46,10 @@ export class AuthService {
         return from(
             this.supabase.auth.signInWithPassword({
                 email: credentials.email,
-                password: credentials.password
-            })
+                password: credentials.password,
+            }),
         ).pipe(
-            map(({data, error}) => {
+            map(({ data, error }) => {
                 if (error) throw error;
                 this.session.set(data.session);
                 this.currentUser.set(data.user);
@@ -60,7 +60,7 @@ export class AuthService {
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Успешно',
-                    detail: 'Вы вошли в систему'
+                    detail: 'Вы вошли в систему',
                 });
             }),
             map(() => true),
@@ -68,7 +68,7 @@ export class AuthService {
                 this.showError('Ошибка входа', err.message);
                 return of(false);
             }),
-            finalize(() => this.loading.set(false))
+            finalize(() => this.loading.set(false)),
         );
     }
 
@@ -76,22 +76,24 @@ export class AuthService {
     logout() {
         this.loading.set(true);
 
-        from(this.supabase.auth.signOut()).pipe(
-            map(({error}) => {
-                if (error) throw error;
-                return true;
-            }),
-            tap(() => {
-                this.session.set(null);
-                this.currentUser.set(null);
-            }),
-            switchMap(() => from(this.router.navigate(['/login']))),
-            catchError((err) => {
-                this.showError('Ошибка выхода', err.message);
-                return of(false);
-            }),
-            finalize(() => this.loading.set(false))
-        ).subscribe();
+        from(this.supabase.auth.signOut())
+            .pipe(
+                map(({ error }) => {
+                    if (error) throw error;
+                    return true;
+                }),
+                tap(() => {
+                    this.session.set(null);
+                    this.currentUser.set(null);
+                }),
+                switchMap(() => from(this.router.navigate(['/login']))),
+                catchError((err) => {
+                    this.showError('Ошибка выхода', err.message);
+                    return of(false);
+                }),
+                finalize(() => this.loading.set(false)),
+            )
+            .subscribe();
     }
 
     private showError(title: string, detail: string): void {
@@ -99,7 +101,7 @@ export class AuthService {
             severity: 'error',
             summary: title,
             detail: detail,
-            life: 5000
+            life: 5000,
         });
     }
 }

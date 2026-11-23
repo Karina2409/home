@@ -1,0 +1,107 @@
+<p-toast />
+
+<div class="p-4 md:p-8">
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-text text-3xl font-bold">Аптечка</h1>
+            <p class="text-muted mt-1">Лекарства и их сроки годности</p>
+        </div>
+        <button pButton class="p-button-primary" (click)="openAddDialog()">
+            <i pButtonIcon class="pi pi-plus"></i>
+            <span pButtonLabel>Добавить лекарство</span>
+        </button>
+    </div>
+
+    @if (loading()) {
+        <div class="flex justify-center py-16">
+            <div class="text-muted">Загрузка...</div>
+        </div>
+    } @else {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @for (medicine of medicines(); track medicine.id) {
+                <p-card
+                    class="cursor-pointer transition-shadow hover:shadow-lg"
+                    [style]="{ borderLeft: '4px solid ' + getExpiryColor(medicine.expiryDate) }"
+                    (click)="openMedicine(medicine)">
+                    @if (medicine.photoUrl) {
+                        <img [src]="medicine.photoUrl" [alt]="medicine.name" class="mb-3 w-full rounded-lg" />
+                    }
+                    <h3 class="text-lg font-semibold">{{ medicine.name }}</h3>
+                    <p class="text-muted mt-1 text-sm">Срок годности: {{ medicine.expiryDate | date: 'dd.MM.yyyy' }}</p>
+                    <div class="mt-2 flex flex-wrap gap-1">
+                        @for (label of medicine.applicationLabels; track label) {
+                            <span class="bg-primary/10 text-primary rounded px-2 py-1 text-xs">
+                                {{ getLabelName(label) }}
+                            </span>
+                        }
+                    </div>
+                </p-card>
+            }
+        </div>
+
+        @if (medicines().length === 0) {
+            <div class="text-muted flex flex-col items-center justify-center py-16">
+                <i class="pi pi-heart text-6xl"></i>
+                <p class="mt-4 text-lg">Нет лекарств</p>
+                <p class="text-sm">Добавьте первое лекарство в аптечку</p>
+            </div>
+        }
+    }
+</div>
+
+<p-dialog
+    [visible]="dialogVisible()"
+    (visibleChange)="dialogVisible.set($event)"
+    header="Новое лекарство"
+    [modal]="true"
+    [style]="{ width: '500px' }">
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="name">Название</label>
+            <input id="name" pInputText [(ngModel)]="formName" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="expiryDate">Срок годности</label>
+            <p-datePicker
+                id="expiryDate"
+                [(ngModel)]="formExpiryDate"
+                dateFormat="dd.mm.yy"
+                [showIcon]="true"
+                class="w-full"></p-datePicker>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="labels">Метки применения</label>
+            <p-multiSelect
+                id="labels"
+                [options]="labelOptions"
+                [(ngModel)]="formApplicationLabels"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Выберите метки"
+                class="w-full" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="photoUrl">URL фото</label>
+            <input id="photoUrl" pInputText [(ngModel)]="formPhotoUrl" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="applicationMethods">Способы применения</label>
+            <textarea
+                id="applicationMethods"
+                pInputText
+                [(ngModel)]="formApplicationMethods"
+                rows="2"
+                class="w-full"></textarea>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="description">Описание</label>
+            <textarea id="description" pInputText [(ngModel)]="formDescription" rows="3" class="w-full"></textarea>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton class="p-button-text" (click)="dialogVisible.set(false)">
+            <span pButtonLabel>Отмена</span>
+        </button>
+        <button pButton (click)="saveMedicine()"><span pButtonLabel>Сохранить</span></button>
+    </ng-template>
+</p-dialog>

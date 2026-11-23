@@ -1,22 +1,17 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    DestroyRef,
-    inject,
-    signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Supply, SupplyFormData } from '@models/supply.model';
-import { SupplyService } from '@services/supplies.service';
-import { SupplyCardComponent } from '@supplies/supply-card/supply-card.component';
-import { SupplyFormComponent } from '@supplies/supply-form/supply-form.component';
-import { SupplyStatsComponent } from '@supplies/supply-stats/supply-stats.component';
 import { ButtonModule } from 'primeng/button';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastModule } from 'primeng/toast';
+import { SupplyService } from './data/supplies.service';
+import { Supply, SupplyFormData } from './models/supply.model';
+import { SupplyCardComponent } from './supply-card/supply-card.component';
+import { SupplyFormComponent } from './supply-form/supply-form.component';
+import { SupplyStatsComponent } from './supply-stats/supply-stats.component';
 
 @Component({
     selector: 'app-supplies-page',
@@ -24,6 +19,8 @@ import { ToastModule } from 'primeng/toast';
     imports: [
         FormsModule,
         InputTextModule,
+        IconFieldModule,
+        InputIconModule,
         ButtonModule,
         ProgressSpinnerModule,
         ToastModule,
@@ -72,17 +69,11 @@ export class SuppliesPageComponent {
     }
 
     onIncrement(id: string): void {
-        this.supplyService
-            .updateQuantity(id, 1)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe();
+        this.supplyService.updateQuantity(id, 1).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
 
     onDecrement(id: string): void {
-        this.supplyService
-            .updateQuantity(id, -1)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe();
+        this.supplyService.updateQuantity(id, -1).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
 
     onDelete(id: string): void {

@@ -1,0 +1,28 @@
+<p-toast />
+
+<div class="mx-auto max-w-2xl p-4 md:p-8">
+    <h1 class="text-text mb-6 text-3xl font-bold">
+        {{ isEdit() ? 'Редактировать комнату' : 'Новая комната' }}
+    </h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="name">Название</label>
+            <input id="name" pInputText formControlName="name" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="color">Цвет</label>
+            <p-colorPicker formControlName="color" [inline]="true" />
+        </div>
+
+        <div class="mt-6 flex gap-3">
+            <button pButton type="submit" [disabled]="form.invalid">
+                <span pButtonLabel>Сохранить</span>
+            </button>
+            <button pButton type="button" class="p-button-text" (click)="goBack()">
+                <span pButtonLabel>Отмена</span>
+            </button>
+        </div>
+    </form>
+</div>

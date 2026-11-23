@@ -1,6 +1,6 @@
 <p-toast />
 
-<div class="mx-auto max-w-6xl p-4 md:p-8">
+<div class="p-4 md:p-8">
     <!-- Header -->
     <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -8,15 +8,10 @@
             <p class="text-muted mt-1">Хозяйственные товары и средства для дома</p>
         </div>
         <div class="flex items-center gap-3">
-            <span class="text-muted hidden text-sm md:inline"
-                >Всего предметов: {{ totalCount() }}</span
-            >
-            <button
-                pButton
-                icon="pi pi-plus"
-                label="Добавить предмет"
-                class="p-button-primary"
-                (click)="openAddDialog()"></button>
+            <span class="text-muted hidden text-sm md:inline">Всего предметов: {{ totalCount() }}</span>
+            <button pButton class="p-button-primary" (click)="openAddDialog()">
+                <i pButtonIcon class="pi pi-plus"></i><span pButtonLabel>Добавить предмет</span>
+            </button>
         </div>
     </div>
 
@@ -25,15 +20,10 @@
 
     <!-- Search -->
     <div class="mb-6">
-        <span class="p-input-icon-left w-full md:w-80">
-            <i class="pi pi-search"></i>
-            <input
-                pInputText
-                type="text"
-                [(ngModel)]="searchQuery"
-                placeholder="Поиск товаров..."
-                class="w-full" />
-        </span>
+        <p-iconfield class="w-full">
+            <p-inputicon class="pi pi-search" />
+            <input pInputText type="text" [(ngModel)]="searchQuery" placeholder="Поиск товаров..." class="w-full" />
+        </p-iconfield>
     </div>
 
     <!-- Loading -->
@@ -53,8 +43,7 @@
                     <i class="pi pi-plus text-xl"></i>
                 </div>
                 <div class="text-center">
-                    <p
-                        class="text-text-secondary group-hover:text-primary font-medium transition-colors">
+                    <p class="text-text-secondary group-hover:text-primary font-medium transition-colors">
                         Добавить товар
                     </p>
                     <p class="text-muted mt-0.5 text-xs">Пополнить запасы дома</p>
@@ -74,8 +63,7 @@
         <!-- Empty State -->
         @if (filteredSupplies().length === 0) {
             <div class="py-16 text-center">
-                <div
-                    class="bg-hover mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                <div class="bg-hover mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
                     <i class="pi pi-search text-muted text-2xl"></i>
                 </div>
                 <p class="text-text-secondary font-medium">Ничего не найдено</p>

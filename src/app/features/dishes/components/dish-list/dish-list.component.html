@@ -1,0 +1,61 @@
+<div class="p-4 md:p-8">
+    <!-- Header -->
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-text text-3xl font-bold">Блюда</h1>
+            <p class="text-muted mt-1">Рецепты и блюда для приготовления</p>
+        </div>
+        <a pButton routerLink="form" class="p-button-primary">
+            <i pButtonIcon class="pi pi-plus"></i>
+            <span pButtonLabel>Добавить блюдо</span>
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row">
+        <p-iconfield class="w-full">
+            <p-inputicon class="pi pi-search" />
+            <input pInputText type="text" [(ngModel)]="searchQuery" placeholder="Поиск блюд..." class="w-full" />
+        </p-iconfield>
+        <p-select
+            [options]="difficultyOptions"
+            [(ngModel)]="difficultyFilter"
+            placeholder="Сложность"
+            class="w-full sm:w-48" />
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+        <div class="flex justify-center py-16">
+            <p-progressSpinner strokeWidth="4" />
+        </div>
+    } @else if (filteredDishes().length === 0) {
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <i class="pi pi-apple text-6xl text-gray-300"></i>
+            <p class="text-muted mt-4 text-lg">Нет блюд</p>
+            <p class="text-muted mt-1">Добавьте первое блюдо, чтобы начать</p>
+        </div>
+    } @else {
+        <!-- Grid -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @for (dish of filteredDishes(); track dish.id) {
+                <a
+                    [routerLink]="['detail', dish.id]"
+                    class="bg-surface border-border hover:border-primary/40 group block rounded-2xl border-2 p-5 transition-all hover:shadow-lg">
+                    @if (dish.photoUrl) {
+                        <img [src]="dish.photoUrl" [alt]="dish.name" class="mb-3 h-40 w-full rounded-lg object-cover" />
+                    } @else {
+                        <div class="bg-tertiary mb-3 flex h-40 w-full items-center justify-center rounded-lg">
+                            <i class="pi pi-apple text-4xl text-gray-400"></i>
+                        </div>
+                    }
+                    <h3 class="text-text text-lg font-semibold">{{ dish.name }}</h3>
+                    <div class="text-muted mt-1 flex items-center gap-3 text-sm">
+                        <span><i class="pi pi-clock"></i> {{ dish.cookTimeMinutes }} мин</span>
+                        <span class="text-yellow-500">{{ getDifficultyLabel(dish.difficulty) }}</span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

@@ -7,28 +7,24 @@ import { MessageService } from 'primeng/api';
 export class SupabaseService {
     private readonly messageService = inject(MessageService);
 
-    readonly client: SupabaseClient = createClient(
-        environment.supabaseUrl,
-        environment.supabaseKey,
-        {
-            auth: {
-                autoRefreshToken: true,
-                persistSession: true,
-            },
-            global: {
-                fetch: async (url, options) => {
-                    const response = await fetch(url, options);
+    readonly client: SupabaseClient = createClient(environment.supabaseUrl, environment.supabaseKey, {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+        },
+        global: {
+            fetch: async (url, options) => {
+                const response = await fetch(url, options);
 
-                    // Перехватывает 401 Unauthorized и 403 Forbidden от Supabase PostgREST API
-                    if (response.status === 401 || response.status === 403) {
-                        this.handleUnauthorized();
-                    }
+                // Перехватывает 401 Unauthorized и 403 Forbidden от Supabase PostgREST API
+                if (response.status === 401 || response.status === 403) {
+                    this.handleUnauthorized();
+                }
 
-                    return response;
-                },
+                return response;
             },
         },
-    );
+    });
 
     private handleUnauthorized(): void {
         this.messageService.add({

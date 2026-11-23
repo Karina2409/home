@@ -1,0 +1,81 @@
+<p-toast />
+
+<div class="mx-auto max-w-2xl p-4 md:p-8">
+    <div class="mb-6 flex items-center justify-between">
+        <a pButton routerLink="/tasks" class="p-button-text"
+            ><i pButtonIcon class="pi pi-arrow-left"></i><span pButtonLabel>Назад</span></a
+        >
+        <h1 class="text-text text-2xl font-bold">
+            {{ isEdit() ? 'Редактировать задание' : 'Новое задание' }}
+        </h1>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-surface space-y-6 rounded-2xl p-6">
+        <!-- Title -->
+        <div>
+            <label for="title" class="text-text mb-2 block font-medium">Название задания</label>
+            <input pInputText id="title" formControlName="title" placeholder="Введите название" class="w-full" />
+        </div>
+
+        <!-- Description -->
+        <div>
+            <label for="description" class="text-text mb-2 block font-medium">Описание</label>
+            <textarea
+                pInputTextarea
+                id="description"
+                formControlName="description"
+                rows="3"
+                placeholder="Описание задачи"
+                class="w-full"></textarea>
+        </div>
+
+        <!-- Deadline -->
+        <div>
+            <label for="deadline" class="text-text mb-2 block font-medium">Дедлайн</label>
+            <p-datePicker
+                id="deadline"
+                formControlName="deadline"
+                dateFormat="dd.mm.yy"
+                [iconDisplay]="'input'"
+                [showIcon]="true"
+                class="w-full"></p-datePicker>
+        </div>
+
+        <!-- Assignees -->
+        <div>
+            <label for="assignees" class="text-text mb-2 block font-medium">Исполнители</label>
+            <div id="assignees" class="space-y-2">
+                @for (assignee of assignees(); track $index) {
+                    <div class="flex items-center gap-2">
+                        <input
+                            pInputText
+                            [(ngModel)]="assignees()[$index]"
+                            [ngModelOptions]="{ standalone: true }"
+                            placeholder="Имя исполнителя"
+                            class="flex-1" />
+                        <p-button severity="danger" size="small" (onClick)="removeAssignee($index)"
+                            ><i pButtonIcon class="pi pi-trash"></i
+                        ></p-button>
+                    </div>
+                }
+                <p-button size="small" (onClick)="addAssignee()"
+                    ><i pButtonIcon class="pi pi-plus"></i><span pButtonLabel>Добавить исполнителя</span></p-button
+                >
+            </div>
+        </div>
+
+        <!-- Repeat -->
+        <div>
+            <label for="repeatType" class="text-text mb-2 block font-medium">Повторение</label>
+            <p-select id="repeatType" [options]="repeatOptions" formControlName="repeatType" class="w-full" />
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end gap-3">
+            <a pButton routerLink="/tasks" class="p-button-outlined"><span pButtonLabel>Отмена</span></a>
+            <button pButton type="submit" [disabled]="form.invalid">
+                <span pButtonLabel>{{ isEdit() ? 'Сохранить' : 'Создать' }}</span>
+            </button>
+        </div>
+    </form>
+</div>

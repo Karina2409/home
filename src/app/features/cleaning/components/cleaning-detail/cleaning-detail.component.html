@@ -1,0 +1,85 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="mx-auto max-w-4xl p-4 md:p-8">
+    @if (room()) {
+        <div class="mb-6 flex items-center gap-4">
+            <button pButton class="p-button-text" (click)="goBack()">
+                <i pButtonIcon class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <h1 class="text-text text-3xl font-bold">{{ room()!.name }}</h1>
+                <p class="text-muted mt-1">Задачи по уборке</p>
+            </div>
+        </div>
+
+        <div class="mb-6 flex justify-end">
+            <button pButton class="p-button-primary" (click)="openAddTaskDialog()">
+                <i pButtonIcon class="pi pi-plus"></i><span pButtonLabel>Добавить задачу</span>
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            @for (task of tasks(); track task.id) {
+                <p-card [style]="{ borderLeft: '4px solid ' + getStatusColor(task.status) }">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold">{{ task.name }}</h3>
+                            <p class="text-muted mt-1 text-sm">{{ task.frequency }}</p>
+                            @if (task.lastCompletedAt) {
+                                <p class="text-muted mt-1 text-xs">
+                                    Выполнено: {{ task.lastCompletedAt | date: 'dd.MM.yyyy HH:mm' }}
+                                </p>
+                            }
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                pButton
+                                class="p-button-success p-button-sm"
+                                (click)="completeTask(task)"
+                                [disabled]="task.status === 'completed'">
+                                <i pButtonIcon class="pi pi-check"></i>
+                            </button>
+                            <button pButton class="p-button-danger p-button-sm" (click)="deleteTask(task)">
+                                <i pButtonIcon class="pi pi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </p-card>
+            }
+        </div>
+
+        @if (tasks().length === 0) {
+            <div class="text-muted flex flex-col items-center justify-center py-16">
+                <i class="pi pi-list text-6xl"></i>
+                <p class="mt-4 text-lg">Нет задач</p>
+                <p class="text-sm">Добавьте первую задачу для этой комнаты</p>
+            </div>
+        }
+    }
+</div>
+
+<p-dialog [(visible)]="taskDialogVisible" header="Новая задача" [modal]="true" [style]="{ width: '450px' }">
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="taskName">Название</label>
+            <input id="taskName" pInputText [(ngModel)]="taskFormName" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="frequency">Частота</label>
+            <p-select
+                id="frequency"
+                [options]="frequencyOptions"
+                [(ngModel)]="taskFormFrequencyType"
+                optionLabel="label"
+                optionValue="value"
+                class="w-full" />
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton class="p-button-text" (click)="taskDialogVisible.set(false)">
+            <span pButtonLabel>Отмена</span>
+        </button>
+        <button pButton (click)="saveTask()"><span pButtonLabel>Сохранить</span></button>
+    </ng-template>
+</p-dialog>

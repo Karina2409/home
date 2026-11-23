@@ -1,0 +1,45 @@
+<div class="mx-auto max-w-4xl p-4 md:p-8">
+    @if (question(); as q) {
+        <div class="mb-6">
+            <button pButton [text]="true" (click)="goBack()">
+                <i pButtonIcon class="pi pi-arrow-left"></i>
+                <span pButtonLabel>Назад</span>
+            </button>
+        </div>
+
+        <div class="bg-surface border-border rounded-2xl border p-6">
+            <p-tag [value]="getCategoryLabel(q.category)" [severity]="getCategorySeverity(q.category)" class="mb-4" />
+            <h1 class="text-text mb-4 text-2xl font-bold">{{ q.text }}</h1>
+
+            @if (q.isAnswered) {
+                <div class="bg-secondary/10 rounded-lg p-4">
+                    <p class="text-text mb-2 font-medium">Ответ:</p>
+                    <p class="text-text">{{ q.answer }}</p>
+                    @if (q.answeredAt) {
+                        <p class="text-muted mt-2 text-sm">Ответ дан: {{ q.answeredAt | date: 'dd.MM.yyyy HH:mm' }}</p>
+                    }
+                </div>
+            } @else {
+                <div class="flex flex-col gap-3">
+                    <label for="answer" class="text-text text-sm font-medium">Ваш ответ:</label>
+                    <textarea
+                        id="answer"
+                        pInputTextarea
+                        [(ngModel)]="answer"
+                        rows="4"
+                        class="w-full"
+                        placeholder="Напишите ваш ответ..."></textarea>
+                    <button pButton (click)="submitAnswer()" [disabled]="!answer().trim()">
+                        <i pButtonIcon class="pi pi-check"></i>
+                        <span pButtonLabel>Сохранить ответ</span>
+                    </button>
+                </div>
+            }
+        </div>
+    } @else {
+        <div class="flex flex-col items-center justify-center py-16">
+            <i class="pi pi-question-circle text-muted mb-4 text-6xl"></i>
+            <p class="text-muted text-lg">Вопрос не найден</p>
+        </div>
+    }
+</div>

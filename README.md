@@ -32,16 +32,16 @@ src/app/
   core/               # авторизация, API-клиенты, guards, интерсепторы, интерфейсы, environments
   shared/             # переиспользуемые компоненты, директивы, пайпы, утилиты
   features/           # модули приложения
-    dishes/
-    fridge/
-    supplies/
-    tasks/
-    cleaning/
-    novelties/
-    firstaid/
-    couples/
-    randomizer/
-    settings/
+    dishes/           # управление рецептами и блюдами
+    fridge/           # учёт продуктов в холодильнике со сроками годности
+    supplies/         # управление запасами и их историей
+    tasks/            # система заданий с дедлайнами и повторением
+    cleaning/         # уборка по комнатам с таймлайном выполнения
+    novelties/        # новые идеи (фильмы, рестораны и т.д.) с оценками
+    firstaid/         # аптечка с лекарствами и сроками годности
+    couples/          # вопросы и задания для пары
+    randomizer/       # рандомайзер для принятия решений
+    settings/         # настройки пользователя (тема, видимость вкладок, push)
   layout/             # shell, навигация, header, bottom-bar
 ```
 
@@ -302,9 +302,472 @@ src/app/
 
 ## 7. Схема базы данных (Supabase)
 
-### 7.1. Существующие таблицы
+### 7.1. Описание таблиц
 
-Таблицы `profiles`, `products`, `dishes`, `dish_ingredients`, `fridge`, `supplies`, `tasks` и связанные триггеры/политики RLS остаются без изменений в части поведения. Ниже — полный набор таблиц с новыми и изменёнными полями.
+#### profiles — Профили пользователей
+
+Автоматически создаётся при регистрации через Supabase Auth. Триггер `handle_new_user()` заполняет профиль данными из `auth.users`.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Ссылка на `auth.users`, каскадное удаление |
+| email | text | Email пользователя |
+| full_name | text | Отображаемое имя (берётся из `raw_user_meta_data`) |
+| avatar_url | text | URL аватара |
+| created_at | timestamptz | Дата создания профиля |
+
+---
+
+#### products — Справочник продуктов
+
+Справочник наименований продуктов. Используется в модулях «Блюда» (ингредиенты) и «Холодильник».
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| name | text | Название продукта (not null) |
+| image_url | text | URL изображения продукта |
+| created_at | timestamptz | Дата добавления |
+
+---
+
+#### units — Единицы измерения
+
+Общий справочник единиц измерения (граммы, штуки, литры и т.д.). Настраивается в модуле «Настройки».
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| name | text | Полное название (например, «Грамм») |
+| abbreviation | text | Краткое обозначение (например, «г») |
+| created_at | timestamptz | Дата добавления |
+
+---
+
+#### dishes — Блюда
+
+Рецепты блюд с пошаговым описанием, временем приготовления и сложностью.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| title | text | Название блюда (not null) |
+| image_url | text | URL фото блюда |
+| cooking_time | integer | Время приготовления в минутах (not null) |
+| difficulty | integer | Сложность от 1 до 5 (not null, CHECK) |
+| recipe | text | Пошаговый рецепт (not null) |
+| created_at | timestamptz | Дата создания |
+| created_by | uuid (FK → profiles) | Автор блюда, `ON DELETE SET NULL` |
+
+**Связи:** `created_by` → `profiles(id)`. Ингредиенты хранятся в отдельной таблице `dish_ingredients`.
+
+---
+
+#### dish_ingredients — Ингредиенты блюд
+
+Связывает блюдо с продуктом из справочника и указывает количество.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| dish_id | uuid (FK → dishes) | Блюдо, `ON DELETE CASCADE` (not null) |
+| product_id | uuid (FK → products) | Продукт из справочника, `ON DELETE CASCADE` (not null) |
+| amount | text | Количество и единица (например, «200 г») (not null) |
+| created_at | timestamptz | Дата добавления |
+
+**Связи:** `dish_id` → `dishes(id)`, `product_id` → `products(id)`.
+
+---
+
+#### fridge — Холодильник
+
+Записи о продуктах в холодильнике со сроками годности.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| product_id | uuid (FK → products) | Продукт из справочника, `ON DELETE CASCADE` (not null) |
+| quantity | numeric | Количество (по умолчанию 1, not null) |
+| unit_id | uuid (FK → units) | Единица измерения, `ON DELETE RESTRICT` (not null) |
+| expiration_date | date | Срок годности (not null) |
+| created_at | timestamptz | Дата добавления |
+| status | — | **Вычисляемое поле на фронтенде** (`FridgeItemStatus`): `expired`, `expiring_today`, `expiring_soon`, `ok`. Определяется по `expiration_date` |
+
+**Связи:** `product_id` → `products(id)`, `unit_id` → `units(id)`.
+
+---
+
+#### supplies — Запасы
+
+Учёт запасов продуктов/товаров с порогом минимального количества.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| name | text | Название запаса (not null) |
+| type | text | Категория/тип запаса (not null) |
+| quantity | integer | Текущее количество (по умолчанию 1, CHECK ≥ 0) |
+| min_threshold | integer | Минимальный порог (по умолчанию 1, CHECK ≥ 0) |
+| created_at | timestamptz | Дата создания |
+| status | — | **Вычисляемое поле на фронтенде** (`SupplyStatus`): `enough` (quantity > min_threshold), `low` (quantity ≤ min_threshold), `out` (quantity = 0) |
+
+---
+
+#### supply_history — История изменений запасов
+
+Журнал всех операций пополнения/расхода по каждому запасу.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| supply_id | uuid (FK → supplies) | Запас, `ON DELETE CASCADE` (not null) |
+| change | integer | Изменение количества (положительное — пополнение, отрицательное — расход) (not null) |
+| note | text | Комментарий к операции |
+| created_at | timestamptz | Дата операции |
+
+**Связи:** `supply_id` → `supplies(id)`.
+
+---
+
+#### tasks — Задания
+
+Общие задания с дедлайнами, повторением и назначением исполнителей.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| title | text | Заголовок задания (not null) |
+| description | text | Описание |
+| is_completed | boolean | Выполнено (по умолчанию false) |
+| repeat_type | text | Тип повторения |
+| repeat_config | jsonb | Конфигурация повторения (см. ниже) |
+| next_due_at | timestamptz | Дата следующего выполнения |
+| created_by | uuid (FK → profiles) | Автор задания, `ON DELETE CASCADE` |
+| created_at | timestamptz | Дата создания |
+
+**Структура `repeat_config` (JSONB):**
+
+```
+{
+  "type": "daily" | "weekly" | "monthly",
+  "daysOfWeek": [1, 3, 5],
+  "dayOfMonth": 15
+}
+```
+
+- `type` — тип повторения: `daily` (ежедневно), `weekly` (еженедельно), `monthly` (ежемесячно).
+- `daysOfWeek` — массив дней недели (0=воскресенье…6=суббота), используется при `type: "weekly"`.
+- `dayOfMonth` — день месяца (1–31), используется при `type: "monthly"`.
+
+**Связи:** `created_by` → `profiles(id)`. Исполнители — в таблице `task_assignees`.
+
+---
+
+#### task_assignees — Исполнители заданий
+
+Связь «многие-ко-многим» между заданиями и пользователями.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| task_id | uuid (FK → tasks, PK) | Задание, `ON DELETE CASCADE` |
+| user_id | uuid (FK → profiles, PK) | Исполнитель, `ON DELETE CASCADE` |
+
+**Связи:** составной первичный ключ `(task_id, user_id)`.
+
+---
+
+#### cleaning_rooms — Комнаты (уборка)
+
+Комнаты/помещения для группировки задач уборки.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| name | text | Название комнаты (not null) |
+| color | text | Цвет комнаты в HEX (по умолчанию `#8FA18B`) |
+| sort_order | integer | Порядок сортировки (по умолчанию 0) |
+| created_at | timestamptz | Дата создания |
+| status | — | **Вычисляемое поле на фронтенде** (`CleaningTaskStatus`): агрегат статусов задач комнаты |
+| taskCount | — | **Вычисляемое поле на фронтенде** — количество задач в комнате |
+| completedTaskCount | — | **Вычисляемое поле на фронтенде** — количество выполненных задач |
+
+---
+
+#### cleaning_tasks — Задачи уборки
+
+Конкретные задачи уборки, привязанные к комнате, с настройкой повторения.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| room_id | uuid (FK → cleaning_rooms) | Комната, `ON DELETE CASCADE` (not null) |
+| title | text | Название задачи (not null) |
+| repeat_type | text | Тип повторения (not null) |
+| repeat_config | jsonb | Конфигурация повторения (см. ниже) |
+| last_completed_at | timestamptz | Дата последнего выполнения |
+| next_due_at | timestamptz | Дата следующего выполнения |
+| created_at | timestamptz | Дата создания |
+| status | — | **Вычисляемое поле на фронтенде** (`CleaningTaskStatus`): `completed`, `due-soon`, `due-today`, `overdue`, `overdue-critical` |
+
+**Структура `repeat_config` (JSONB):**
+
+```
+{
+  "type": "daily" | "everyNDays" | "weekly" | "specificDays" | "everyNWeeks" | "monthly",
+  "interval": 3,
+  "dayOfWeek": 1,
+  "daysOfWeek": [1, 3, 5],
+  "dayOfMonth": 15
+}
+```
+
+- `type` — тип повторения: `daily` (ежедневно), `everyNDays` (каждые N дней), `weekly` (еженедельно), `specificDays` (в определённые дни недели), `everyNWeeks` (каждые N недель), `monthly` (ежемесячно).
+- `interval` — интервал для `everyNDays` и `everyNWeeks`.
+- `dayOfWeek` — день недели для `weekly` (0=воскресенье…6=суббота).
+- `daysOfWeek` — массив дней недели для `specificDays`.
+- `dayOfMonth` — день месяца для `monthly` (1–31).
+
+**Связи:** `room_id` → `cleaning_rooms(id)`. История выполнения — в таблице `cleaning_history`.
+
+---
+
+#### cleaning_history — История выполнения уборки
+
+Журнал выполненных задач уборки.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| task_id | uuid (FK → cleaning_tasks) | Задача, `ON DELETE CASCADE` (not null) |
+| completed_by | uuid (FK → profiles) | Кто выполнил, `ON DELETE SET NULL` |
+| completed_at | timestamptz | Дата и время выполнения |
+
+**Связи:** `task_id` → `cleaning_tasks(id)`, `completed_by` → `profiles(id)`.
+
+---
+
+#### novelties — Новинки
+
+Идеи (фильмы, рестораны, места и т.д.) со статусом: хотим попробовать, понравилось, не понравилось.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| title | text | Название (not null) |
+| description | text | Описание |
+| image_url | text | URL изображения |
+| status | text | Статус (not null, по умолчанию `want_to_try`). Допустимые значения: `want_to_try`, `liked`, `disliked` |
+| created_at | timestamptz | Дата создания |
+| rating | — | **Вычисляемое поле на фронтенде** — средний рейтинг по комментариям |
+| likes | — | **Вычисляемое поле на фронтенде** — количество лайков (подсчитывается по `novelty_likes`) |
+| dislikes | — | **Вычисляемое поле на фронтенде** — количество дизлайков (подсчитывается по `novelty_likes`) |
+
+---
+
+#### novelty_likes — Лайки/дизлайки новинок
+
+Каждый пользователь может поставить лайк или дизлайк одной новинке.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| novelty_id | uuid (FK → novelties, PK) | Новинка, `ON DELETE CASCADE` |
+| user_id | uuid (FK → profiles, PK) | Пользователь, `ON DELETE CASCADE` |
+| is_like | boolean | `true` — лайк, `false` — дизлайк (not null) |
+
+**Связи:** составной первичный ключ `(novelty_id, user_id)`. Один пользователь — одна оценка на новинку.
+
+---
+
+#### novelty_comments — Комментарии к новинкам
+
+Комментарии с рейтингом к новинкам.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| novelty_id | uuid (FK → novelties) | Новинка, `ON DELETE CASCADE` (not null) |
+| user_id | uuid (FK → profiles) | Автор комментария, `ON DELETE CASCADE` (not null) |
+| text | text | Текст комментария (not null) |
+| rating | integer | Оценка от 1 до 5 (CHECK) |
+| created_at | timestamptz | Дата создания |
+
+**Связи:** `novelty_id` → `novelties(id)`, `user_id` → `profiles(id)`.
+
+---
+
+#### medicines — Лекарства
+
+Препараты домашней аптечки с фото, сроком годности и описанием.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| name | text | Название лекарства (not null) |
+| image_url | text | URL фото |
+| expiration_date | date | Срок годности |
+| description | text | Описание / дополнительная информация |
+| created_at | timestamptz | Дата добавления |
+| applicationLabels | — | **Связь через `medicine_to_tags`** — метки применения (голова, горло и т.д.) |
+| applicationMethods | — | **Связь через `medicine_applications`** — способы применения |
+
+---
+
+#### medicine_tags — Метки лекарств
+
+Справочник меток/тегов для классификации лекарств (симптомы, части тела).
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| name | text | Название метки (not null), например: `head`, `stomach`, `throat`, `ears`, `menstrual`, `nose`, `teeth`, `skin`, `other` |
+| created_at | timestamptz | Дата создания |
+
+**Допустимые значения `ApplicationLabel`:** `head` (Голова), `stomach` (Живот), `throat` (Горло), `ears` (Уши), `menstrual` (Месячные), `nose` (Насморк), `teeth` (Зубы), `skin` (Кожа), `other` (Другое).
+
+---
+
+#### medicine_to_tags — Связь лекарств и меток
+
+Таблица связи «многие-ко-многим» между лекарствами и метками.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| medicine_id | uuid (FK → medicines, PK) | Лекарство, `ON DELETE CASCADE` |
+| tag_id | uuid (FK → medicine_tags, PK) | Метка, `ON DELETE CASCADE` |
+
+**Связи:** составной первичный ключ `(medicine_id, tag_id)`.
+
+---
+
+#### medicine_applications — Способы применения лекарств
+
+Инструкции по применению для каждого лекарства.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| medicine_id | uuid (FK → medicines) | Лекарство, `ON DELETE CASCADE` (not null) |
+| instructions | text | Инструкция по применению (not null) |
+| created_at | timestamptz | Дата добавления |
+
+**Связи:** `medicine_id` → `medicines(id)`.
+
+---
+
+#### couple_questions — Вопросы для пары
+
+Банк вопросов для пары, разделённых по категориям.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| text | text | Текст вопроса (not null) |
+| category | text | Категория: `romantic`, `fun`, `deep`, `future`, `memories` |
+| is_active | boolean | Активен ли вопрос (по умолчанию true) |
+| created_at | timestamptz | Дата создания |
+
+**Категории вопросов:** `romantic` (Романтика), `fun` (Весёлые), `deep` (Глубокие), `future` (Будущее), `memories` (Воспоминания).
+
+---
+
+#### daily_question_log — Лог вопроса дня
+
+Хранит историю показа «вопроса дня» — по одному вопросу на дату.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| question_id | uuid (FK → couple_questions) | Вопрос, `ON DELETE CASCADE` (not null) |
+| shown_at | date | Дата показа (not null, по умолчанию текущая дата, UNIQUE) |
+
+**Связи:** `question_id` → `couple_questions(id)`. Ограничение `UNIQUE (shown_at)` — не более одного вопроса на дату.
+
+---
+
+#### randomizer_lists — Списки рандомайзера
+
+Списки для рандомайзера: либо набор вариантов, либо вопрос да/нет.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| name | text | Название списка (not null) |
+| type | text | Тип: `list` (список вариантов) или `yes_no` (да/нет) (not null, по умолчанию `list`) |
+| last_result | text | Последний выпавший результат |
+| created_at | timestamptz | Дата создания |
+
+---
+
+#### randomizer_items — Элементы списков рандомайзера
+
+Варианты внутри списка рандомайзера.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| list_id | uuid (FK → randomizer_lists) | Родительский список, `ON DELETE CASCADE` (not null) |
+| value | text | Значение/вариант (not null) |
+| created_at | timestamptz | Дата добавления |
+
+**Связи:** `list_id` → `randomizer_lists(id)`.
+
+---
+
+#### user_settings — Настройки пользователя
+
+Персональные настройки каждого пользователя: тема, видимые вкладки, push-уведомления.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| user_id | uuid (PK, FK → profiles) | Пользователь, `ON DELETE CASCADE` |
+| theme | text | Тема: `light` или `dark` (по умолчанию `light`, CHECK) |
+| visible_tabs | jsonb | Массив видимых вкладок (см. ниже) |
+| push_enabled | boolean | Push-уведомления включены (по умолчанию true) |
+| created_at | timestamptz | Дата создания настроек |
+| updated_at | timestamptz | Дата последнего обновления |
+
+**Структура `visible_tabs` (JSONB):**
+
+Массив строк типа `VisibleTab`:
+
+```json
+["dishes", "fridge", "supplies", "tasks", "cleaning", "novelties", "firstaid", "couples", "randomizer"]
+```
+
+Допустимые значения: `dishes`, `fridge`, `supplies`, `tasks`, `cleaning`, `novelties`, `firstaid`, `couples`, `randomizer`.
+
+---
+
+#### push_subscriptions — Push-подписки
+
+Web Push-подписки для отправки уведомлений через Edge Functions.
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| id | uuid (PK) | Уникальный идентификатор |
+| user_id | uuid (FK → profiles) | Пользователь, `ON DELETE CASCADE` (not null) |
+| subscription | jsonb | Данные подписки Web Push (not null, см. ниже) |
+| created_at | timestamptz | Дата создания подписки |
+
+**Структура `subscription` (JSONB):**
+
+```json
+{
+  "endpoint": "https://fcm.googleapis.com/fcm/send/...",
+  "keys": {
+    "p256dh": "BASE64_KEY",
+    "auth": "BASE64_AUTH"
+  }
+}
+```
+
+Стандартная структура `PushSubscription` из Web Push API.
+
+**Связи:** `user_id` → `profiles(id)`.
+
+---
+
+### 7.2. SQL-скрипты создания таблиц
 
 ```sql
 -- ==========================================
@@ -579,10 +1042,19 @@ create table public.push_subscriptions (
   subscription jsonb not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+```
 
--- ==========================================
--- 16. RLS
--- ==========================================
+### 7.3. Row Level Security (RLS)
+
+Все таблицы имеют включённый Row Level Security. Политики доступа:
+
+- **Общие таблицы** (`products`, `units`, `dishes`, `dish_ingredients`, `fridge`, `supplies`, `supply_history`, `tasks`, `task_assignees`, `cleaning_rooms`, `cleaning_tasks`, `cleaning_history`, `novelties`, `novelty_likes`, `novelty_comments`, `medicines`, `medicine_tags`, `medicine_to_tags`, `medicine_applications`, `couple_questions`, `daily_question_log`, `randomizer_lists`, `randomizer_items`) — полный доступ для всех аутентифицированных пользователей.
+- **user_settings** — доступ только к своим настройкам (`auth.uid() = user_id`).
+- **push_subscriptions** — доступ только к своим подпискам (`auth.uid() = user_id`).
+- **profiles** — чтение доступно всем аутентифицированным, редактирование — только своего профиля (`auth.uid() = id`).
+
+```sql
+-- Включение RLS для всех таблиц
 alter table public.profiles enable row level security;
 alter table public.products enable row level security;
 alter table public.units enable row level security;
@@ -610,7 +1082,7 @@ alter table public.randomizer_items enable row level security;
 alter table public.user_settings enable row level security;
 alter table public.push_subscriptions enable row level security;
 
--- Примеры политик (полный доступ для authenticated)
+-- Политики: полный доступ для authenticated
 create policy "Полный доступ" on public.products for all to authenticated using (true) with check (true);
 create policy "Полный доступ" on public.units for all to authenticated using (true) with check (true);
 create policy "Полный доступ" on public.dishes for all to authenticated using (true) with check (true);
@@ -635,6 +1107,7 @@ create policy "Полный доступ" on public.daily_question_log for all t
 create policy "Полный доступ" on public.randomizer_lists for all to authenticated using (true) with check (true);
 create policy "Полный доступ" on public.randomizer_items for all to authenticated using (true) with check (true);
 
+-- Персональные политики
 create policy "Свои настройки" on public.user_settings
   for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 

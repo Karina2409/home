@@ -1,0 +1,104 @@
+<p-toast />
+
+<div class="mx-auto max-w-3xl p-4 md:p-8">
+    <div class="mb-6 flex items-center justify-between">
+        <a pButton routerLink="/dishes" class="p-button-text"
+            ><i pButtonIcon class="pi pi-arrow-left"></i><span pButtonLabel>Назад</span></a
+        >
+        <h1 class="text-text text-2xl font-bold">
+            {{ isEdit() ? 'Редактировать блюдо' : 'Новое блюдо' }}
+        </h1>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-surface space-y-6 rounded-2xl p-6">
+        <!-- Name -->
+        <div>
+            <label for="dishName" class="text-text mb-2 block font-medium">Название блюда</label>
+            <input pInputText id="dishName" formControlName="name" placeholder="Введите название" class="w-full" />
+        </div>
+
+        <!-- Photo URL -->
+        <div>
+            <label for="photoUrl" class="text-text mb-2 block font-medium">URL фото</label>
+            <input pInputText id="photoUrl" formControlName="photoUrl" placeholder="https://..." class="w-full" />
+        </div>
+
+        <!-- Cook time & Difficulty -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <label for="cookTimeMinutes" class="text-text mb-2 block font-medium">Время приготовления (мин)</label>
+                <p-inputNumber id="cookTimeMinutes" formControlName="cookTimeMinutes" [min]="1" class="w-full" />
+            </div>
+            <div>
+                <label for="difficulty" class="text-text mb-2 block font-medium">Сложность</label>
+                <p-select id="difficulty" formControlName="difficulty" class="w-full" />
+            </div>
+        </div>
+
+        <!-- Ingredients -->
+        <div>
+            <div class="mb-3 flex items-center justify-between">
+                <label class="text-text font-medium">Ингредиенты</label>
+                <p-button size="small" (onClick)="addIngredient()"
+                    ><i pButtonIcon class="pi pi-plus"></i><span pButtonLabel>Добавить</span></p-button
+                >
+            </div>
+            @for (ing of ingredients(); track $index) {
+                <div class="mb-2 flex items-center gap-2">
+                    <input
+                        pInputText
+                        [(ngModel)]="ing.name"
+                        [ngModelOptions]="{ standalone: true }"
+                        placeholder="Название"
+                        class="flex-1" />
+                    <p-inputNumber
+                        [(ngModel)]="ing.quantity"
+                        [ngModelOptions]="{ standalone: true }"
+                        [min]="1"
+                        class="w-24" />
+                    <input
+                        pInputText
+                        [(ngModel)]="ing.unit"
+                        [ngModelOptions]="{ standalone: true }"
+                        placeholder="Ед."
+                        class="w-20" />
+                    <p-button severity="danger" size="small" (onClick)="removeIngredient($index)"
+                        ><i pButtonIcon class="pi pi-trash"></i
+                    ></p-button>
+                </div>
+            }
+        </div>
+
+        <!-- Steps -->
+        <div>
+            <div class="mb-3 flex items-center justify-between">
+                <label class="text-text font-medium">Пошаговый рецепт</label>
+                <p-button size="small" (onClick)="addStep()"
+                    ><i pButtonIcon class="pi pi-plus"></i><span pButtonLabel>Добавить шаг</span></p-button
+                >
+            </div>
+            @for (step of steps(); track $index) {
+                <div class="mb-2 flex items-center gap-2">
+                    <span class="text-muted w-6 text-sm font-bold">{{ $index + 1 }}.</span>
+                    <textarea
+                        pInputTextarea
+                        [(ngModel)]="steps()[$index]"
+                        [ngModelOptions]="{ standalone: true }"
+                        rows="2"
+                        class="flex-1"></textarea>
+                    <p-button severity="danger" size="small" (onClick)="removeStep($index)"
+                        ><i pButtonIcon class="pi pi-trash"></i
+                    ></p-button>
+                </div>
+            }
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end gap-3">
+            <a pButton routerLink="/dishes" class="p-button-outlined"><span pButtonLabel>Отмена</span></a>
+            <button pButton type="submit" [disabled]="form.invalid">
+                <span pButtonLabel>{{ isEdit() ? 'Сохранить' : 'Создать' }}</span>
+            </button>
+        </div>
+    </form>
+</div>

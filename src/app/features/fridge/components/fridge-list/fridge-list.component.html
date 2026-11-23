@@ -1,0 +1,59 @@
+<div class="p-4 md:p-8">
+    <!-- Header -->
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-text text-3xl font-bold">Холодильник</h1>
+            <p class="text-muted mt-1">Продукты и их сроки годности</p>
+        </div>
+        <a pButton routerLink="form" class="p-button-primary"
+            ><i pButtonIcon class="pi pi-plus"></i><span pButtonLabel>Добавить продукт</span></a
+        >
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row">
+        <p-iconfield class="w-full">
+            <p-inputicon class="pi pi-search" />
+            <input pInputText type="text" [(ngModel)]="searchQuery" placeholder="Поиск продуктов..." class="w-full" />
+        </p-iconfield>
+        <p-select [options]="statusOptions" [(ngModel)]="statusFilter" placeholder="Статус" class="w-full sm:w-56" />
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+        <div class="flex justify-center py-16">
+            <p-progressSpinner strokeWidth="4" />
+        </div>
+    } @else if (filteredItems().length === 0) {
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <i class="pi pi-box text-6xl text-gray-300"></i>
+            <p class="text-muted mt-4 text-lg">Холодильник пуст</p>
+            <p class="text-muted mt-1">Добавьте первый продукт</p>
+        </div>
+    } @else {
+        <!-- Grid -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @for (item of filteredItems(); track item.id) {
+                <a
+                    [routerLink]="['detail', item.id]"
+                    class="bg-surface border-border hover:border-primary/40 group block rounded-2xl border-2 p-5 transition-all hover:shadow-lg">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="text-text text-lg font-semibold">{{ item.productName }}</h3>
+                            <p class="text-muted mt-1 text-sm">{{ item.quantity }} {{ item.unit }}</p>
+                        </div>
+                        <span
+                            class="rounded-full px-2 py-1 text-xs font-medium text-white"
+                            [class]="getStatusColor(item.status)">
+                            {{ getStatusLabel(item.status) }}
+                        </span>
+                    </div>
+                    <div class="text-muted mt-3 text-sm">
+                        <i class="pi pi-calendar"></i>
+                        Срок: {{ item.expirationDate | date: 'dd.MM.yyyy' }}
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

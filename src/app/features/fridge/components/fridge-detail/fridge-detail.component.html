@@ -1,0 +1,50 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="mx-auto max-w-3xl p-4 md:p-8">
+    @if (item(); as i) {
+        <!-- Header -->
+        <div class="mb-6 flex items-center justify-between">
+            <a pButton routerLink="/fridge" class="p-button-text"
+                ><i pButtonIcon class="pi pi-arrow-left"></i><span pButtonLabel>Назад</span></a
+            >
+            <div class="flex gap-2">
+                <a pButton [routerLink]="['form']" class="p-button-outlined"
+                    ><i pButtonIcon class="pi pi-pencil"></i><span pButtonLabel>Редактировать</span></a
+                >
+                <p-button severity="danger" (onClick)="onDelete()"
+                    ><i pButtonIcon class="pi pi-trash"></i><span pButtonLabel>Удалить</span></p-button
+                >
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="bg-surface rounded-2xl p-6">
+            @if (i.photoUrl) {
+                <img [src]="i.photoUrl" [alt]="i.productName" class="mb-6 h-48 w-full rounded-lg object-cover" />
+            }
+
+            <h1 class="text-text text-3xl font-bold">{{ i.productName }}</h1>
+
+            <div class="text-muted mt-4 space-y-2">
+                <p>
+                    <i class="pi pi-box"></i> Количество:
+                    <strong>{{ i.quantity }} {{ i.unit }}</strong>
+                </p>
+                <p>
+                    <i class="pi pi-calendar"></i> Срок годности:
+                    <strong>{{ i.expirationDate | date: 'dd.MM.yyyy' }}</strong>
+                </p>
+                <p>
+                    <i class="pi pi-info-circle"></i> Статус: <strong>{{ i.status }}</strong>
+                </p>
+            </div>
+        </div>
+    } @else {
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <i class="pi pi-exclamation-triangle text-6xl text-gray-300"></i>
+            <p class="text-muted mt-4 text-lg">Продукт не найден</p>
+            <a pButton routerLink="/fridge" class="mt-4"><span pButtonLabel>Вернуться к списку</span></a>
+        </div>
+    }
+</div>

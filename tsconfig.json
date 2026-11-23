@@ -21,7 +21,8 @@
             "@guards/*": ["./src/app/core/guards/*"],
             "@interceptors/*": ["./src/app/core/interceptors/*"],
             "@models/*": ["./src/app/core/models/*"],
-            "@layout/*": ["./src/app/core/layout/*"],
+            "@auth/*": ["./src/app/core/auth/*"],
+            "@layout/*": ["./src/app/layout/*"],
 
             "@shared/*": ["./src/app/shared/*"],
             "@components/*": ["./src/app/shared/components/*"],
@@ -33,7 +34,12 @@
             "@fridge/*": ["./src/app/features/fridge/*"],
             "@supplies/*": ["./src/app/features/supplies/*"],
             "@tasks/*": ["./src/app/features/tasks/*"],
-            "@shopping_list/*": ["./src/app/features/shopping_list/*"]
+            "@cleaning/*": ["./src/app/features/cleaning/*"],
+            "@couples/*": ["./src/app/features/couples/*"],
+            "@firstaid/*": ["./src/app/features/firstaid/*"],
+            "@novelties/*": ["./src/app/features/novelties/*"],
+            "@randomizer/*": ["./src/app/features/randomizer/*"],
+            "@settings/*": ["./src/app/features/settings/*"]
         }
     },
     "angularCompilerOptions": {

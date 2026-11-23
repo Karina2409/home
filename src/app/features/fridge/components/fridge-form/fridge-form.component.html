@@ -1,0 +1,63 @@
+<p-toast />
+
+<div class="mx-auto max-w-2xl p-4 md:p-8">
+    <div class="mb-6 flex items-center justify-between">
+        <a pButton routerLink="/fridge" class="p-button-text"
+            ><i pButtonIcon class="pi pi-arrow-left"></i><span pButtonLabel>Назад</span></a
+        >
+        <h1 class="text-text text-2xl font-bold">
+            {{ isEdit() ? 'Редактировать продукт' : 'Новый продукт' }}
+        </h1>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-surface space-y-6 rounded-2xl p-6">
+        <!-- Product Name -->
+        <div>
+            <label for="productName" class="text-text mb-2 block font-medium">Название продукта</label>
+            <input
+                pInputText
+                id="productName"
+                formControlName="productName"
+                placeholder="Введите название"
+                class="w-full" />
+        </div>
+
+        <!-- Photo URL -->
+        <div>
+            <label for="photoUrl" class="text-text mb-2 block font-medium">URL фото</label>
+            <input pInputText id="photoUrl" formControlName="photoUrl" placeholder="https://..." class="w-full" />
+        </div>
+
+        <!-- Quantity & Unit -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <label for="quantity" class="text-text mb-2 block font-medium">Количество</label>
+                <p-inputNumber id="quantity" formControlName="quantity" [min]="1" class="w-full" />
+            </div>
+            <div>
+                <label for="unit" class="text-text mb-2 block font-medium">Единица измерения</label>
+                <input pInputText id="unit" formControlName="unit" placeholder="шт, кг, л" class="w-full" />
+            </div>
+        </div>
+
+        <!-- Expiration Date -->
+        <div>
+            <label for="expirationDate" class="text-text mb-2 block font-medium">Срок годности</label>
+            <p-datePicker
+                id="expirationDate"
+                formControlName="expirationDate"
+                dateFormat="dd.mm.yy"
+                [iconDisplay]="'input'"
+                [showIcon]="true"
+                class="w-full"></p-datePicker>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end gap-3">
+            <a pButton routerLink="/fridge" class="p-button-outlined"><span pButtonLabel>Отмена</span></a>
+            <button pButton type="submit" [disabled]="form.invalid">
+                <span pButtonLabel>{{ isEdit() ? 'Сохранить' : 'Создать' }}</span>
+            </button>
+        </div>
+    </form>
+</div>

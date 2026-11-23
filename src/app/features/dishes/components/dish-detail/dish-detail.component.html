@@ -1,0 +1,73 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="mx-auto max-w-4xl p-4 md:p-8">
+    @if (dish(); as d) {
+        <!-- Header -->
+        <div class="mb-6 flex items-center justify-between">
+            <a pButton routerLink="/dishes" class="p-button-text">
+                <i pButtonIcon class="pi pi-arrow-left"></i>
+                <span pButtonLabel>Назад</span>
+            </a>
+            <div class="flex gap-2">
+                <a pButton [routerLink]="['form']" class="p-button-outlined">
+                    <i pButtonIcon class="pi pi-pencil"></i>
+                    <span pButtonLabel>Редактировать</span>
+                </a>
+                <p-button severity="danger" (onClick)="onDelete()"
+                    ><i pButtonIcon class="pi pi-trash"></i><span pButtonLabel>Удалить</span></p-button
+                >
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="bg-surface rounded-2xl p-6">
+            @if (d.photoUrl) {
+                <img [src]="d.photoUrl" [alt]="d.name" class="mb-6 h-64 w-full rounded-lg object-cover" />
+            }
+
+            <h1 class="text-text text-3xl font-bold">{{ d.name }}</h1>
+
+            <div class="text-muted mt-2 flex items-center gap-4">
+                <span><i class="pi pi-clock"></i> {{ d.cookTimeMinutes }} мин</span>
+                <span class="text-lg text-yellow-500">{{ getDifficultyLabel(d.difficulty) }}</span>
+            </div>
+
+            <!-- Ingredients -->
+            @if (d.ingredients.length > 0) {
+                <div class="mt-8">
+                    <h2 class="text-text mb-3 text-xl font-semibold">Ингредиенты</h2>
+                    <ul class="space-y-2">
+                        @for (ing of d.ingredients; track ing.name) {
+                            <li class="bg-tertiary rounded-lg p-3">
+                                <span class="font-medium">{{ ing.name }}</span>
+                                <span class="text-muted ml-2 text-sm">{{ ing.quantity }} {{ ing.unit }}</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <!-- Steps -->
+            @if (d.steps.length > 0) {
+                <div class="mt-8">
+                    <h2 class="text-text mb-3 text-xl font-semibold">Пошаговый рецепт</h2>
+                    <ol class="space-y-3">
+                        @for (step of d.steps; track step; let i = $index) {
+                            <li class="bg-tertiary rounded-lg p-4">
+                                <span class="text-primary mr-2 font-bold">{{ i + 1 }}.</span>
+                                {{ step }}
+                            </li>
+                        }
+                    </ol>
+                </div>
+            }
+        </div>
+    } @else {
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <i class="pi pi-exclamation-triangle text-6xl text-gray-300"></i>
+            <p class="text-muted mt-4 text-lg">Блюдо не найдено</p>
+            <a pButton routerLink="/dishes" class="mt-4"><span pButtonLabel>Вернуться к списку</span></a>
+        </div>
+    }
+</div>

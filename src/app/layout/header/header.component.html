@@ -1,0 +1,44 @@
+<!-- MOBILE HEADER -->
+<header
+    class="sticky top-0 z-10 flex items-center justify-between border-b border-[#EFEAE4] bg-[#FBF9F6] p-4 md:hidden">
+    <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#7D5241] font-bold text-white">
+            <i class="pi pi-home"></i>
+        </div>
+        <h1 class="font-serif text-2xl font-bold text-[#4A3B32]">Family Hearth</h1>
+    </div>
+    <button class="p-2 text-[#6B5A4D]">
+        <i class="pi pi-cog text-xl"></i>
+    </button>
+</header>
+
+<!-- MAIN HEADER & ACTIONS -->
+<div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+    <div>
+        <div class="flex items-baseline justify-between md:block">
+            <h2 class="font-serif text-3xl font-bold text-[#3B2C23]">Запасы</h2>
+            <span class="text-xs text-[#8C7A6B] md:hidden">Всего предметов: {{ totalCount() }}</span>
+        </div>
+        <p class="hidden text-sm text-[#8C7A6B] md:block">Хозяйственные товары и средства для дома</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+        <!-- Поиск -->
+        <div class="relative flex-1 md:w-72">
+            <i class="pi pi-search absolute top-1/2 left-3 -translate-y-1/2 text-[#8C7A6B]"></i>
+            <input
+                type="text"
+                [ngModel]="searchQuery()"
+                (ngModelChange)="onSearchChange($event)"
+                placeholder="Поиск товаров..."
+                class="w-full rounded-full border border-[#E8E2DA] bg-white py-2.5 pr-4 pl-9 text-sm focus:ring-2 focus:ring-[#7D5241] focus:outline-none" />
+        </div>
+
+        <!-- Кнопка Добавить (Десктоп) -->
+        <button
+            (click)="openAddModal.emit()"
+            class="hidden cursor-pointer items-center gap-2 rounded-full bg-[#7D5241] px-5 py-2.5 font-medium text-white shadow-sm transition hover:bg-[#654133] md:flex">
+            <i class="pi pi-plus"></i> Добавить предмет
+        </button>
+    </div>
+</div>

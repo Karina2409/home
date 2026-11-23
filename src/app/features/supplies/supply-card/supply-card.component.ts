@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { Supply } from '@models/supply.model';
+import { Supply } from '@features/supplies';
 
 @Component({
     selector: 'app-supply-card',

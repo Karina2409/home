@@ -1,0 +1,192 @@
+<p-toast />
+
+<div class="p-4 md:p-8">
+    <!-- Header -->
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-text text-3xl font-bold">Рандомайзер</h1>
+            <p class="text-muted mt-1">Принимайте решения легко и весело</p>
+        </div>
+        <button pButton (click)="openAddList()">
+            <i pButtonIcon class="pi pi-plus"></i>
+            <span pButtonLabel>Новый список</span>
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <p-tabs value="lists">
+        <p-tablist>
+            <p-tab value="lists">Списки</p-tab>
+            <p-tab value="yesno">Да / Нет</p-tab>
+            <p-tab value="history">История</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+            <!-- Lists Panel -->
+            <p-tabpanel value="lists">
+                @if (loading()) {
+                    <div class="flex justify-center py-16">
+                        <p-progressSpinner strokeWidth="4" />
+                    </div>
+                } @else if (lists().length === 0) {
+                    <div class="flex flex-col items-center justify-center py-16">
+                        <i class="pi pi-list text-muted mb-4 text-6xl"></i>
+                        <p class="text-muted text-lg">Пока нет списков</p>
+                        <p class="text-muted mt-1">Создайте первый список для рандомайзера</p>
+                    </div>
+                } @else {
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        @for (list of lists(); track list.id) {
+                            <div class="bg-surface border-border rounded-2xl border p-5">
+                                <div class="mb-3 flex items-start justify-between">
+                                    <h3 class="text-text text-lg font-semibold">{{ list.name }}</h3>
+                                    <div class="flex gap-1">
+                                        <button
+                                            pButton
+                                            severity="secondary"
+                                            size="small"
+                                            [text]="true"
+                                            (click)="editList(list.id)">
+                                            <i pButtonIcon class="pi pi-pencil"></i>
+                                        </button>
+                                        <button
+                                            pButton
+                                            severity="danger"
+                                            size="small"
+                                            [text]="true"
+                                            (click)="deleteList(list.id)">
+                                            <i pButtonIcon class="pi pi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mb-4 flex flex-wrap gap-2">
+                                    @for (item of list.items; track item) {
+                                        <p-tag [value]="item" severity="secondary" />
+                                    }
+                                </div>
+                                <button pButton class="w-full" (click)="pickRandom(list.id)">
+                                    <i pButtonIcon class="pi pi-spin pi-sync"></i>
+                                    <span pButtonLabel>Выбрать случайное</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </p-tabpanel>
+
+            <!-- Yes/No Panel -->
+            <p-tabpanel value="yesno">
+                <div class="mx-auto max-w-md">
+                    <div class="bg-surface border-border mb-6 rounded-2xl border p-6">
+                        <h3 class="text-text mb-4 text-lg font-semibold">Задайте вопрос</h3>
+                        <div class="flex flex-col gap-4">
+                            <input
+                                pInputText
+                                [(ngModel)]="yesNoQuestion"
+                                placeholder="Введите вопрос..."
+                                class="w-full" />
+                            <button pButton (click)="decideYesNo()" [disabled]="!yesNoQuestion()?.trim()">
+                                <i pButtonIcon class="pi pi-question"></i>
+                                <span pButtonLabel>Решить!</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (yesNoHistory().length > 0) {
+                        <h4 class="text-text mb-3 font-semibold">Последние решения</h4>
+                        <div class="flex flex-col gap-2">
+                            @for (decision of yesNoHistory(); track decision.id) {
+                                <div
+                                    class="bg-surface border-border flex items-center justify-between rounded-xl border p-3">
+                                    <span class="text-text">{{ decision.question }}</span>
+                                    <p-tag
+                                        [value]="decision.answer === 'yes' ? 'Да' : 'Нет'"
+                                        [severity]="decision.answer === 'yes' ? 'success' : 'danger'" />
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </p-tabpanel>
+
+            <!-- History Panel -->
+            <p-tabpanel value="history">
+                @if (history().length === 0) {
+                    <div class="flex flex-col items-center justify-center py-16">
+                        <i class="pi pi-history text-muted mb-4 text-6xl"></i>
+                        <p class="text-muted text-lg">История пуста</p>
+                        <p class="text-muted mt-1">Здесь будут ваши случайные выборы</p>
+                    </div>
+                } @else {
+                    <div class="flex flex-col gap-2">
+                        @for (choice of history(); track choice.id) {
+                            <div
+                                class="bg-surface border-border flex items-center justify-between rounded-xl border p-4">
+                                <div>
+                                    <p class="text-text font-medium">{{ choice.selectedItem }}</p>
+                                    <p class="text-muted text-sm">
+                                        {{ getListName(choice.listId) }}
+                                    </p>
+                                </div>
+                                <span class="text-muted text-sm">{{ choice.chosenAt | date: 'dd.MM HH:mm' }}</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
+</div>
+
+<!-- Result Dialog -->
+@if (currentResult()) {
+    <p-dialog
+        header="Результат"
+        [modal]="true"
+        [(visible)]="resultDialogVisible"
+        [style]="{ width: '350px' }"
+        (onHide)="clearResult()">
+        <div class="flex flex-col items-center gap-4 py-4">
+            <i class="pi pi-star-fill text-6xl text-yellow-500"></i>
+            <p class="text-text text-center text-2xl font-bold">{{ currentResult() }}</p>
+        </div>
+    </p-dialog>
+}
+
+<!-- Add/Edit List Dialog -->
+<p-dialog
+    [header]="isEditing() ? 'Редактировать список' : 'Новый список'"
+    [modal]="true"
+    [(visible)]="listDialogVisible"
+    [style]="{ width: '500px' }">
+    <div class="flex flex-col gap-4">
+        <div>
+            <label for="listName" class="text-text mb-2 block text-sm font-medium"> Название списка </label>
+            <input
+                id="listName"
+                pInputText
+                [(ngModel)]="listName"
+                class="w-full"
+                placeholder="Например: Куда пойти на ужин" />
+        </div>
+        <div>
+            <label for="listItems" class="text-text mb-2 block text-sm font-medium"
+                >Элементы (каждый с новой строки)</label
+            >
+            <textarea
+                id="listItems"
+                pInputTextarea
+                [(ngModel)]="listItemsText"
+                rows="6"
+                class="w-full"
+                placeholder="Пицца&#10;Суши&#10;Бургер"></textarea>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton severity="secondary" [text]="true" (click)="listDialogVisible.set(false)">
+            <span pButtonLabel>Отмена</span>
+        </button>
+        <button pButton (click)="submitList()" [disabled]="!listName()?.trim() || !listItemsText()?.trim()">
+            <span pButtonLabel>Сохранить</span>
+        </button>
+    </ng-template>
+</p-dialog>

@@ -1,0 +1,121 @@
+<p-toast />
+
+<div class="p-4 md:p-8">
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-text text-3xl font-bold">Новинки</h1>
+            <p class="text-muted mt-1">Идеи, которые хотим попробовать</p>
+        </div>
+        <button pButton class="p-button-primary" (click)="openAddDialog()">
+            <i pButtonIcon class="pi pi-plus"></i>
+            <span pButtonLabel>Добавить новинку</span>
+        </button>
+    </div>
+
+    <p-tabs value="want">
+        <p-tablist>
+            <p-tab value="want">Хотим попробовать</p-tab>
+            <p-tab value="like">Понравилось</p-tab>
+            <p-tab value="unlike">Не понравилось</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+            <p-tabpanel value="want">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @for (novelty of wantNovelties(); track novelty.id) {
+                        <p-card class="cursor-pointer transition-shadow hover:shadow-lg" (click)="openNovelty(novelty)">
+                            @if (novelty.photoUrl) {
+                                <img [src]="novelty.photoUrl" [alt]="novelty.name" class="mb-3 w-full rounded-lg" />
+                            }
+                            <h3 class="text-lg font-semibold">{{ novelty.name }}</h3>
+                            <p class="text-muted mt-1 line-clamp-2 text-sm">
+                                {{ novelty.description }}
+                            </p>
+                        </p-card>
+                    }
+                </div>
+                @if (wantNovelties().length === 0) {
+                    <div class="text-muted flex flex-col items-center justify-center py-16">
+                        <i class="pi pi-star text-6xl"></i>
+                        <p class="mt-4 text-lg">Нет новинок</p>
+                    </div>
+                }
+            </p-tabpanel>
+            <p-tabpanel value="like">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @for (novelty of likedNovelties(); track novelty.id) {
+                        <p-card class="cursor-pointer transition-shadow hover:shadow-lg" (click)="openNovelty(novelty)">
+                            @if (novelty.photoUrl) {
+                                <img [src]="novelty.photoUrl" [alt]="novelty.name" class="mb-3 w-full rounded-lg" />
+                            }
+                            <h3 class="text-lg font-semibold">{{ novelty.name }}</h3>
+                            <p class="text-muted mt-1 line-clamp-2 text-sm">
+                                {{ novelty.description }}
+                            </p>
+                            @if (novelty.rating) {
+                                <div class="mt-2 flex items-center gap-2">
+                                    <i class="pi pi-star-fill text-yellow-500"></i>
+                                    <span>{{ novelty.rating }}</span>
+                                </div>
+                            }
+                        </p-card>
+                    }
+                </div>
+                @if (likedNovelties().length === 0) {
+                    <div class="text-muted flex flex-col items-center justify-center py-16">
+                        <i class="pi pi-thumbs-up text-6xl"></i>
+                        <p class="mt-4 text-lg">Нет понравившихся новинок</p>
+                    </div>
+                }
+            </p-tabpanel>
+            <p-tabpanel value="unlike">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @for (novelty of dislikedNovelties(); track novelty.id) {
+                        <p-card class="cursor-pointer transition-shadow hover:shadow-lg" (click)="openNovelty(novelty)">
+                            @if (novelty.photoUrl) {
+                                <img [src]="novelty.photoUrl" [alt]="novelty.name" class="mb-3 w-full rounded-lg" />
+                            }
+                            <h3 class="text-lg font-semibold">{{ novelty.name }}</h3>
+                            <p class="text-muted mt-1 line-clamp-2 text-sm">
+                                {{ novelty.description }}
+                            </p>
+                        </p-card>
+                    }
+                </div>
+                @if (dislikedNovelties().length === 0) {
+                    <div class="text-muted flex flex-col items-center justify-center py-16">
+                        <i class="pi pi-thumbs-down text-6xl"></i>
+                        <p class="mt-4 text-lg">Нет непонравившихся новинок</p>
+                    </div>
+                }
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
+</div>
+
+<p-dialog
+    [visible]="dialogVisible()"
+    (visibleChange)="dialogVisible.set($event)"
+    header="Новая новинка"
+    [modal]="true"
+    [style]="{ width: '500px' }">
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="name">Название</label>
+            <input id="name" pInputText [(ngModel)]="formName" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="description">Описание</label>
+            <textarea id="description" pInputText [(ngModel)]="formDescription" rows="4" class="w-full"></textarea>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="photoUrl">URL фото</label>
+            <input id="photoUrl" type="text" pInputText [(ngModel)]="formPhotoUrl" class="w-full" />
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton class="p-button-text" (click)="closeDialog()">
+            <span pButtonLabel>Отмена</span>
+        </button>
+        <button pButton (click)="saveNovelty()"><span pButtonLabel>Сохранить</span></button>
+    </ng-template>
+</p-dialog>

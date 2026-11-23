@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Supply, SupplyFormData } from '@models/supply.model';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { Supply, SupplyFormData } from '@features/supplies';
 
 const CATEGORIES = [
     { label: 'Ванная комната', value: 'Ванная комната' },
@@ -26,14 +26,7 @@ const UNITS = [
 
 @Component({
     selector: 'app-supply-form',
-    imports: [
-        ReactiveFormsModule,
-        DialogModule,
-        ButtonModule,
-        InputTextModule,
-        InputNumberModule,
-        SelectModule,
-    ],
+    imports: [ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, InputNumberModule, SelectModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './supply-form.component.html',
     styleUrl: './supply-form.component.scss',

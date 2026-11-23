@@ -1,0 +1,67 @@
+<p-toast />
+
+<div class="p-4 md:p-8">
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-text text-3xl font-bold">Уборка</h1>
+            <p class="text-muted mt-1">Комнаты и задачи по уборке</p>
+        </div>
+        <button pButton class="p-button-primary" (click)="openAddRoomDialog()">
+            <i pButtonIcon class="pi pi-plus"></i><span pButtonLabel>Добавить комнату</span>
+        </button>
+    </div>
+
+    @if (loading()) {
+        <div class="flex justify-center py-16">
+            <div class="text-muted">Загрузка...</div>
+        </div>
+    } @else {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @for (room of rooms(); track room.id) {
+                <p-card
+                    class="cursor-pointer transition-shadow hover:shadow-lg"
+                    [style]="{ borderLeft: '4px solid ' + room.color }"
+                    (click)="openRoom(room)">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold">{{ room.name }}</h3>
+                        <div class="h-4 w-4 rounded-full" [style.background]="getStatusColor(room.status)"></div>
+                    </div>
+                    <div class="text-muted mt-2 text-sm">
+                        Задач: {{ room.taskCount }} | Выполнено: {{ room.completedTaskCount }}
+                    </div>
+                </p-card>
+            }
+        </div>
+
+        @if (rooms().length === 0) {
+            <div class="text-muted flex flex-col items-center justify-center py-16">
+                <i class="pi pi-home text-6xl"></i>
+                <p class="mt-4 text-lg">Нет комнат</p>
+                <p class="text-sm">Добавьте первую комнату для начала уборки</p>
+            </div>
+        }
+    }
+</div>
+
+<p-dialog
+    [(visible)]="dialogVisible"
+    [header]="selectedRoom() ? 'Редактировать комнату' : 'Новая комната'"
+    [modal]="true"
+    [style]="{ width: '450px' }">
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="name">Название</label>
+            <input id="name" pInputText [(ngModel)]="roomFormName" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="color">Цвет</label>
+            <p-colorPicker [(ngModel)]="roomFormColor" [inline]="true" />
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton class="p-button-text" (click)="dialogVisible.set(false)">
+            <span pButtonLabel>Отмена</span>
+        </button>
+        <button pButton (click)="saveRoom()"><span pButtonLabel>Сохранить</span></button>
+    </ng-template>
+</p-dialog>

@@ -1,0 +1,209 @@
+<p-toast />
+
+<div class="p-4 md:p-8">
+    <div class="mb-6">
+        <h1 class="text-text text-3xl font-bold">Вопросы для пары</h1>
+        <p class="text-muted mt-1">Узнавайте друг друга лучше каждый день</p>
+    </div>
+
+    @if (dailyQuestion(); as dq) {
+        <div class="bg-primary/5 border-primary/20 mb-6 rounded-2xl border p-6">
+            <h2 class="text-primary mb-2 flex items-center gap-2 text-lg font-semibold">
+                <i class="pi pi-heart-fill"></i>
+                Вопрос дня
+            </h2>
+            <p class="text-text text-lg">{{ getQuestionText(dq.questionId) }}</p>
+        </div>
+    }
+
+    <p-tabs value="questions">
+        <p-tablist>
+            <p-tab value="questions">Вопросы</p-tab>
+            <p-tab value="tasks">Задания</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+            <p-tabpanel value="questions">
+                <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <input
+                        pInputText
+                        type="text"
+                        [ngModel]="searchQuery()"
+                        (ngModelChange)="searchQuery.set($event)"
+                        placeholder="Поиск вопросов..."
+                        class="w-full sm:w-72" />
+                    <p-select
+                        [options]="categories()"
+                        [ngModel]="selectedCategory()"
+                        (ngModelChange)="selectedCategory.set($event)"
+                        placeholder="Все категории"
+                        [showClear]="true"
+                        class="w-full sm:w-48" />
+                    <button pButton (click)="openAddQuestion()">
+                        <i pButtonIcon class="pi pi-plus"></i>
+                        <span pButtonLabel>Добавить вопрос</span>
+                    </button>
+                </div>
+
+                @if (filteredQuestions().length === 0) {
+                    <div class="flex flex-col items-center justify-center py-16">
+                        <i class="pi pi-comments text-muted mb-4 text-6xl"></i>
+                        <p class="text-muted text-lg">Пока нет вопросов</p>
+                        <p class="text-muted mt-1">Добавьте первый вопрос для пары</p>
+                    </div>
+                } @else {
+                    <div class="flex flex-col gap-3">
+                        @for (question of filteredQuestions(); track question.id) {
+                            <p-card>
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex-1">
+                                        <div class="mb-2 flex items-center gap-2">
+                                            <p-tag
+                                                [value]="getCategoryLabel(question.category)"
+                                                [severity]="getCategorySeverity(question.category)" />
+                                            @if (question.isAnswered) {
+                                                <p-tag value="Отвечено" severity="success" />
+                                            }
+                                        </div>
+                                        <p class="text-text">{{ question.text }}</p>
+                                        @if (question.isAnswered && question.answer) {
+                                            <div class="text-muted mt-2 text-sm">
+                                                <strong>Ответ:</strong> {{ question.answer }}
+                                            </div>
+                                        }
+                                        @if (!question.isAnswered) {
+                                            <div class="mt-3 flex gap-2">
+                                                <input
+                                                    pInputText
+                                                    type="text"
+                                                    [(ngModel)]="answerInputs[question.id]"
+                                                    placeholder="Ваш ответ..."
+                                                    class="flex-1" />
+                                                <button pButton (click)="answerQuestion(question.id)">
+                                                    <i pButtonIcon class="pi pi-check"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                    <button
+                                        pButton
+                                        severity="danger"
+                                        size="small"
+                                        [text]="true"
+                                        (click)="deleteQuestion(question.id)">
+                                        <i pButtonIcon class="pi pi-trash"></i>
+                                    </button>
+                                </div>
+                            </p-card>
+                        }
+                    </div>
+                }
+            </p-tabpanel>
+
+            <p-tabpanel value="tasks">
+                <div class="mb-4 flex items-center justify-end">
+                    <button pButton (click)="openAddTask()">
+                        <i pButtonIcon class="pi pi-plus"></i>
+                        <span pButtonLabel>Добавить задание</span>
+                    </button>
+                </div>
+
+                @if (tasks().length === 0) {
+                    <div class="flex flex-col items-center justify-center py-16">
+                        <i class="pi pi-list-check text-muted mb-4 text-6xl"></i>
+                        <p class="text-muted text-lg">Пока нет заданий</p>
+                        <p class="text-muted mt-1">Добавьте совместное задание</p>
+                    </div>
+                } @else {
+                    <div class="flex flex-col gap-3">
+                        @for (task of tasks(); track task.id) {
+                            <div class="bg-surface border-border flex items-center gap-4 rounded-xl border p-4">
+                                <p-checkbox
+                                    [ngModel]="task.isCompleted"
+                                    (ngModelChange)="toggleTask(task.id)"
+                                    [binary]="true" />
+                                <div class="flex-1">
+                                    <p class="text-text font-medium" [class.line-through]="task.isCompleted">
+                                        {{ task.title }}
+                                    </p>
+                                    @if (task.description) {
+                                        <p class="text-muted text-sm">{{ task.description }}</p>
+                                    }
+                                </div>
+                                <button
+                                    pButton
+                                    severity="danger"
+                                    size="small"
+                                    [text]="true"
+                                    (click)="deleteTask(task.id)">
+                                    <i pButtonIcon class="pi pi-trash"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
+</div>
+
+<p-dialog
+    [visible]="questionDialogVisible()"
+    (visibleChange)="questionDialogVisible.set($event)"
+    [modal]="true"
+    [style]="{ width: '500px' }"
+    header="Новый вопрос">
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="questionText">Текст вопроса</label>
+            <input id="questionText" pInputText [(ngModel)]="newQuestionText" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="questionCategory">Категория</label>
+            <p-select
+                id="questionCategory"
+                [options]="categories()"
+                [(ngModel)]="newQuestionCategory"
+                placeholder="Выберите категорию"
+                class="w-full" />
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton severity="secondary" [text]="true" (click)="questionDialogVisible.set(false)">
+            <span pButtonLabel>Отмена</span>
+        </button>
+        <button pButton (click)="submitQuestion()">
+            <span pButtonLabel>Сохранить</span>
+        </button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [visible]="taskDialogVisible()"
+    (visibleChange)="taskDialogVisible.set($event)"
+    [modal]="true"
+    [style]="{ width: '500px' }"
+    header="Новое задание">
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="taskTitle">Название</label>
+            <input id="taskTitle" pInputText [(ngModel)]="newTaskTitle" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label for="taskDescription">Описание</label>
+            <textarea
+                id="taskDescription"
+                pInputText
+                [(ngModel)]="newTaskDescription"
+                rows="3"
+                class="w-full"></textarea>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton severity="secondary" [text]="true" (click)="taskDialogVisible.set(false)">
+            <span pButtonLabel>Отмена</span>
+        </button>
+        <button pButton (click)="submitTask()">
+            <span pButtonLabel>Сохранить</span>
+        </button>
+    </ng-template>
+</p-dialog>

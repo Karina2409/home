@@ -8,18 +8,15 @@
     <form [formGroup]="form" class="flex flex-col gap-4">
         <!-- Name -->
         <div class="flex flex-col gap-1.5">
-            <label class="text-text-secondary text-sm font-medium">Название</label>
-            <input
-                pInputText
-                formControlName="name"
-                placeholder="Например: Шампунь"
-                class="w-full" />
+            <label for="supplyName" class="text-text-secondary text-sm font-medium">Название</label>
+            <input id="supplyName" pInputText formControlName="name" placeholder="Например: Шампунь" class="w-full" />
         </div>
 
         <!-- Category -->
         <div class="flex flex-col gap-1.5">
-            <label class="text-text-secondary text-sm font-medium">Категория / Место</label>
+            <label for="supplyCategory" class="text-text-secondary text-sm font-medium">Категория / Место</label>
             <p-select
+                id="supplyCategory"
                 [options]="categories"
                 formControlName="category"
                 placeholder="Выберите категорию"
@@ -29,8 +26,9 @@
 
         <!-- Location -->
         <div class="flex flex-col gap-1.5">
-            <label class="text-text-secondary text-sm font-medium">Расположение</label>
+            <label for="supplyLocation" class="text-text-secondary text-sm font-medium">Расположение</label>
             <input
+                id="supplyLocation"
                 pInputText
                 formControlName="location"
                 placeholder="Например: Ванная комната"
@@ -40,16 +38,18 @@
         <!-- Quantity & Min Quantity -->
         <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
-                <label class="text-text-secondary text-sm font-medium">Количество</label>
+                <label for="supplyQuantity" class="text-text-secondary text-sm font-medium">Количество</label>
                 <p-inputNumber
+                    id="supplyQuantity"
                     formControlName="quantity"
                     [min]="0"
                     [showButtons]="false"
                     placeholder="0" />
             </div>
             <div class="flex flex-col gap-1.5">
-                <label class="text-text-secondary text-sm font-medium">Мин. запас</label>
+                <label for="supplyMinQuantity" class="text-text-secondary text-sm font-medium">Мин. запас</label>
                 <p-inputNumber
+                    id="supplyMinQuantity"
                     formControlName="minQuantity"
                     [min]="0"
                     [showButtons]="false"
@@ -59,8 +59,9 @@
 
         <!-- Unit -->
         <div class="flex flex-col gap-1.5">
-            <label class="text-text-secondary text-sm font-medium">Единица измерения</label>
+            <label for="supplyUnit" class="text-text-secondary text-sm font-medium">Единица измерения</label>
             <p-select
+                id="supplyUnit"
                 [options]="units"
                 formControlName="unit"
                 placeholder="Выберите единицу"
@@ -71,19 +72,12 @@
 
     <ng-template pTemplate="footer">
         <div class="flex justify-end gap-3">
-            <button
-                pButton
-                type="button"
-                label="Отмена"
-                class="p-button-text p-button-secondary"
-                (click)="onCancel()"></button>
-            <button
-                pButton
-                type="button"
-                [label]="isEdit() ? 'Сохранить' : 'Добавить'"
-                class="p-button-primary"
-                [disabled]="form.invalid"
-                (click)="onSubmit()"></button>
+            <button pButton type="button" class="p-button-text p-button-secondary" (click)="onCancel()">
+                <span pButtonLabel>Отмена</span>
+            </button>
+            <button pButton type="button" class="p-button-primary" [disabled]="form.invalid" (click)="onSubmit()">
+                <span pButtonLabel>{{ isEdit() ? 'Сохранить' : 'Добавить' }}</span>
+            </button>
         </div>
     </ng-template>
 </p-dialog>

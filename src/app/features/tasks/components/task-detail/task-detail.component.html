@@ -1,0 +1,76 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="mx-auto max-w-3xl p-4 md:p-8">
+    @if (task(); as t) {
+        <!-- Header -->
+        <div class="mb-6 flex items-center justify-between">
+            <a pButton routerLink="/tasks" class="p-button-text"
+                ><i pButtonIcon class="pi pi-arrow-left"></i><span pButtonLabel>Назад</span></a
+            >
+            <div class="flex gap-2">
+                <a pButton [routerLink]="['form']" class="p-button-outlined"
+                    ><i pButtonIcon class="pi pi-pencil"></i><span pButtonLabel>Редактировать</span></a
+                >
+                <p-button severity="danger" (onClick)="onDelete()"
+                    ><i pButtonIcon class="pi pi-trash"></i><span pButtonLabel>Удалить</span></p-button
+                >
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="bg-surface rounded-2xl p-6">
+            <div class="flex items-start justify-between">
+                <h1 class="text-text text-3xl font-bold">{{ t.title }}</h1>
+                @if (t.completed) {
+                    <span class="rounded-full bg-green-500 px-3 py-1 text-sm font-medium text-white">Выполнено</span>
+                }
+            </div>
+
+            @if (t.description) {
+                <p class="text-muted mt-4">{{ t.description }}</p>
+            }
+
+            <div class="text-muted mt-6 space-y-3">
+                @if (t.deadline) {
+                    <p>
+                        <i class="pi pi-calendar"></i> Дедлайн:
+                        <strong>{{ t.deadline | date: 'dd.MM.yyyy' }}</strong>
+                    </p>
+                }
+
+                @if (t.assignees.length > 0) {
+                    <div>
+                        <p class="mb-2"><i class="pi pi-users"></i> Исполнители:</p>
+                        <div class="flex flex-wrap gap-2">
+                            @for (assignee of t.assignees; track assignee) {
+                                <span class="bg-tertiary rounded-full px-3 py-1 text-sm">{{ assignee }}</span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (t.repeatConfig) {
+                    <p>
+                        <i class="pi pi-refresh"></i> Повторение:
+                        <strong>{{ getRepeatLabel(t.repeatConfig) }}</strong>
+                    </p>
+                }
+            </div>
+
+            @if (!t.completed) {
+                <div class="mt-6">
+                    <p-button severity="success" (onClick)="onComplete()"
+                        ><i pButtonIcon class="pi pi-check"></i><span pButtonLabel>Отметить выполненным</span></p-button
+                    >
+                </div>
+            }
+        </div>
+    } @else {
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <i class="pi pi-exclamation-triangle text-6xl text-gray-300"></i>
+            <p class="text-muted mt-4 text-lg">Задание не найдено</p>
+            <a pButton routerLink="/tasks" class="mt-4"><span pButtonLabel>Вернуться к списку</span></a>
+        </div>
+    }
+</div>

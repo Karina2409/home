@@ -46,16 +46,16 @@ src/app/
     models/             # общие интерфейсы
     services/           # общие сервисы (supabase, push, theme)
   features/             # функциональные модули
-    dishes/
-    fridge/
-    supplies/
-    tasks/
-    cleaning/
-    novelties/
-    firstaid/
-    couples/
-    randomizer/
-    settings/
+    dishes/             # управление рецептами и блюдами
+    fridge/             # учёт продуктов в холодильнике со сроками годности
+    supplies/           # управление запасами и их историей
+    tasks/              # система заданий с дедлайнами и повторением
+    cleaning/           # уборка по комнатам с таймлайном выполнения
+    novelties/          # новые идеи (фильмы, рестораны и т.д.) с оценками
+    firstaid/           # аптечка с лекарствами и сроками годности
+    couples/            # вопросы и задания для пары
+    randomizer/         # рандомайзер для принятия решений
+    settings/           # настройки пользователя (тема, видимость вкладок, push)
   shared/               # переиспользуемые компоненты
     components/         # image-uploader, confirm-dialog, empty-state и т.д.
     directives/

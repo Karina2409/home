@@ -1,0 +1,69 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="mx-auto max-w-4xl p-4 md:p-8">
+    @if (novelty()) {
+        <div class="mb-6 flex items-center gap-4">
+            <button pButton class="p-button-text" (click)="goBack()">
+                <i pButtonIcon class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <h1 class="text-text text-3xl font-bold">{{ novelty()!.name }}</h1>
+                <p class="text-muted mt-1">Добавлено {{ novelty()!.createdAt | date: 'dd.MM.yyyy' }}</p>
+            </div>
+        </div>
+
+        <p-card>
+            @if (novelty()!.photoUrl) {
+                <img [src]="novelty()!.photoUrl" [alt]="novelty()!.name" class="mb-4 w-full rounded-lg" />
+            }
+
+            <p class="mb-4">{{ novelty()!.description }}</p>
+
+            <div class="mb-4 flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-thumbs-up text-green-600"></i>
+                    <span>{{ novelty()!.likes }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-thumbs-down text-red-600"></i>
+                    <span>{{ novelty()!.dislikes }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <p-rating [(ngModel)]="noveltyRating" [readonly]="true" [stars]="5"></p-rating>
+                    <span class="text-muted text-sm">({{ novelty()!.rating }})</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button
+                    pButton
+                    class="p-button-secondary"
+                    (click)="updateStatus('want')"
+                    [disabled]="novelty()!.status === 'want'">
+                    <span pButtonLabel>Хотим попробовать</span>
+                </button>
+                <button
+                    pButton
+                    class="p-button-success"
+                    (click)="updateStatus('liked')"
+                    [disabled]="novelty()!.status === 'liked'">
+                    <span pButtonLabel>Понравилось</span>
+                </button>
+                <button
+                    pButton
+                    class="p-button-danger"
+                    (click)="updateStatus('disliked')"
+                    [disabled]="novelty()!.status === 'disliked'">
+                    <span pButtonLabel>Не понравилось</span>
+                </button>
+            </div>
+        </p-card>
+
+        <div class="mt-6 flex justify-end">
+            <button pButton class="p-button-danger" (click)="deleteNovelty()">
+                <i pButtonIcon class="pi pi-trash"></i><span pButtonLabel>Удалить</span>
+            </button>
+        </div>
+    }
+</div>
